@@ -54,6 +54,5 @@ O usuário pode acompanhar ao vivo em http://localhost:5173 (`npm start`).
 
 ## Limites
 
-- Não commite `.env` nem `output/runs/` (já estão no .gitignore).
 - Não invente dados de leads reais nos ICPs — invente personas, não pessoas.
 - Mudanças em `config/tools.json` valem na próxima simulação (sem restart).
