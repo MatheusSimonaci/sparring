@@ -1,0 +1,32 @@
+{
+  "id": "router-trio",
+  "name": "Roteador: gpt-oss-120b + GPT-5.4 mini (vendedor) + Opus 4.8 (closer)",
+  "mode": "router",
+  "promptId": "v2",
+  "rerouteEveryTurn": true,
+  "router": {
+    "model": "openai/gpt-oss-120b",
+    "temperature": 0,
+    "reasoningEffort": "low",
+    "maxTokens": 400
+  },
+  "roles": [
+    {
+      "id": "vendedor",
+      "label": "Vendedor principal",
+      "model": "openai/gpt-5.4-mini",
+      "reasoningEffort": "medium",
+      "description": "Use para a maior parte da conversa, ENQUANTO NAO ha decisao financeira concreta: abertura, identificacao de responsavel, qualificacao, perguntas pra revelar a lacuna, apresentacao da ideia, uso das ferramentas de CRM, follow-ups comuns e objecoes simples sem preco.",
+      "promptAddendum": ""
+    },
+    {
+      "id": "closer",
+      "label": "Closer de negociacao",
+      "model": "anthropic/claude-opus-4.8",
+      "reasoningEffort": "low",
+      "description": "Use assim que surgir qualquer sinal de decisao ou negociacao: pedido de preco, objecao de preco, pedido de desconto, 'vou pensar' depois da apresentacao, 'vou falar com meu socio', tentativa de comparar alternativas, negociacao de condicao, lead claramente pronto pra fechar, ou caso de ticket potencialmente alto.",
+      "promptAddendum": ""
+    }
+  ],
+  "defaultRole": "vendedor"
+}

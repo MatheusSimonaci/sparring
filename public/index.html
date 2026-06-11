@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>4virtue - Treino do Chatbot</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <strong>4virtue</strong> <span class="muted">treino do agente de prospeccao</span>
+      </div>
+      <div id="health" class="health">verificando...</div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="run">Rodar</button>
+      <button class="tab" data-tab="prompt">Prompt do agente</button>
+      <button class="tab" data-tab="agents">Agentes / Roteamento</button>
+      <button class="tab" data-tab="icps">ICPs</button>
+      <button class="tab" data-tab="history">Historico</button>
+    </nav>
+
+    <main>
+      <!-- ===================== RODAR ===================== -->
+      <section id="tab-run" class="tabpane active">
+        <div class="run-layout">
+          <aside class="run-config">
+            <h2>Configurar simulacao</h2>
+
+            <label>Agente (setup)</label>
+            <select id="run-agent-setup"></select>
+            <p id="run-setup-info" class="hint"></p>
+
+            <label>Prompt do agente (playbook)</label>
+            <select id="run-prompt"></select>
+
+            <label>ICPs (clientes simulados)</label>
+            <div id="run-icps" class="checklist"></div>
+
+            <div class="row" id="run-single-models">
+              <div>
+                <label>Modelo do agente (modo unico)</label>
+                <input id="run-agent-model" type="text" placeholder="(padrao do .env)" />
+              </div>
+              <div>
+                <label>Modelo do ICP</label>
+                <input id="run-icp-model" type="text" placeholder="(padrao do .env)" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label>Max. turnos</label>
+                <input id="run-maxturns" type="number" min="2" max="40" />
+              </div>
+              <div>
+                <label>Repeticoes por ICP</label>
+                <input id="run-repeat" type="number" min="1" max="10" value="1" />
+              </div>
+              <div>
+                <label>Teto US$/conversa</label>
+                <input id="run-budget" type="number" min="0" step="0.05" />
+              </div>
+            </div>
+
+            <button id="run-btn" class="primary">Rodar simulacao</button>
+            <div class="run-controls">
+              <button id="cancel-btn" class="danger" disabled>Cancelar</button>
+              <button id="clear-btn">Limpar</button>
+            </div>
+            <p id="run-status" class="muted"></p>
+          </aside>
+
+          <div class="run-output" id="run-output">
+            <p class="muted empty">Selecione um prompt e ICPs e clique em Rodar. As conversas aparecem aqui em tempo real.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== PROMPT ===================== -->
+      <section id="tab-prompt" class="tabpane">
+        <div class="editor-head">
+          <div>
+            <label>Prompt</label>
+            <select id="prompt-select"></select>
+          </div>
+          <div class="grow"></div>
+          <input id="prompt-newid" type="text" placeholder="novo id (ex.: v2)" />
+          <button id="prompt-saveas">Salvar como</button>
+          <button id="prompt-save" class="primary">Salvar</button>
+        </div>
+        <textarea id="prompt-editor" class="code" spellcheck="false"></textarea>
+        <p id="prompt-status" class="muted"></p>
+      </section>
+
+      <!-- ===================== AGENTES / ROTEAMENTO ===================== -->
+      <section id="tab-agents" class="tabpane">
+        <div class="icp-layout">
+          <aside class="icp-list">
+            <div class="icp-list-head">
+              <h2>Setups</h2>
+              <button id="agent-new">+ Novo</button>
+            </div>
+            <ul id="agent-ul"></ul>
+            <p class="hint">Um setup define os modelos do agente. <b>single</b> = um modelo so. <b>router</b> = um roteador escolhe, a cada turno, entre os papeis (ex.: vendedor e closer).</p>
+          </aside>
+          <div class="icp-editor">
+            <div class="row">
+              <div>
+                <label>id</label>
+                <input id="agent-id" type="text" placeholder="ex.: router-trio" />
+              </div>
+              <div>
+                <label>Nome (exibicao)</label>
+                <input id="agent-name" type="text" />
+              </div>
+              <div class="narrow">
+                <label>Modo</label>
+                <select id="agent-mode"><option value="router">router</option><option value="single">single</option></select>
+              </div>
+              <div class="narrow">
+                <label>Playbook</label>
+                <select id="agent-prompt"></select>
+              </div>
+            </div>
+            <label>Configuracao (JSON) - router + roles, ou model unico. Cada modelo aceita: <code>model</code>, <code>temperature</code> (quando suportado), <code>reasoningEffort</code> (low/medium/high, quando suportado), <code>description</code> (para o roteador escolher) e <code>promptAddendum</code>.</label>
+            <textarea id="agent-config" class="code tall" spellcheck="false"></textarea>
+            <div class="editor-actions">
+              <button id="agent-delete" class="danger">Excluir</button>
+              <button id="agent-template-router">Template router</button>
+              <button id="agent-template-single">Template single</button>
+              <div class="grow"></div>
+              <button id="agent-save" class="primary">Salvar setup</button>
+            </div>
+            <p id="agent-status" class="muted"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== ICPs ===================== -->
+      <section id="tab-icps" class="tabpane">
+        <div class="icp-layout">
+          <aside class="icp-list">
+            <div class="icp-list-head">
+              <h2>ICPs</h2>
+              <button id="icp-new">+ Novo</button>
+            </div>
+            <ul id="icp-ul"></ul>
+          </aside>
+          <div class="icp-editor">
+            <div class="row">
+              <div>
+                <label>id</label>
+                <input id="icp-id" type="text" placeholder="ex.: arquiteto-cetico" />
+              </div>
+              <div>
+                <label>Nome (exibicao)</label>
+                <input id="icp-name" type="text" />
+              </div>
+              <div class="narrow">
+                <label>Estagio inicial</label>
+                <input id="icp-stage" type="number" value="6" />
+              </div>
+            </div>
+            <label>Persona (como o cliente simulado se comporta)</label>
+            <textarea id="icp-persona" class="code tall" spellcheck="false"></textarea>
+            <label>Ficha de pesquisa (JSON) - o que o agente recebe sobre o lead</label>
+            <textarea id="icp-ficha" class="code" spellcheck="false"></textarea>
+            <div class="editor-actions">
+              <button id="icp-delete" class="danger">Excluir</button>
+              <div class="grow"></div>
+              <button id="icp-save" class="primary">Salvar ICP</button>
+            </div>
+            <p id="icp-status" class="muted"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== HISTORICO ===================== -->
+      <section id="tab-history" class="tabpane">
+        <div class="history-layout">
+          <aside class="history-list">
+            <div class="icp-list-head">
+              <h2>Transcricoes</h2>
+              <button id="history-refresh">Atualizar</button>
+            </div>
+            <ul id="history-ul"></ul>
+          </aside>
+          <div class="history-view" id="history-view">
+            <p class="muted empty">Selecione uma transcricao para ver a conversa e baixar o JSON.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

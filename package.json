@@ -1,0 +1,17 @@
+{
+  "name": "4virtue-chatbot-training",
+  "version": "1.0.0",
+  "description": "Simulador local de treino do agente de prospeccao da 4virtue: roda o agente (bot sob teste) contra ICPs simulados via OpenRouter e gera transcricoes JSON para analise.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node src/server.js",
+    "serve": "node src/server.js",
+    "run": "node cli/run.js",
+    "analyze": "node cli/analyze.js",
+    "test": "node test/empty-recovery.test.mjs && node test/icp-decision.test.mjs && node test/routing.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "single-sonnet",
+  "name": "Modelo unico: Claude Sonnet 4.5 (baseline barato)",
+  "mode": "single",
+  "promptId": "v2",
+  "model": "anthropic/claude-sonnet-4.5",
+  "temperature": 0.6,
+  "reasoningEffort": null
+}

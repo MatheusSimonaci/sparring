@@ -1,0 +1,724 @@
+{
+  "id": "83996406-9e77-4504-81a9-661b4d808dc8",
+  "createdAt": "2026-06-11T00:29:01.882Z",
+  "schemaVersion": 2,
+  "icp": {
+    "id": "moveis-meta-ads",
+    "name": "Matheus - Moveis planejados (quente, negocia preco)",
+    "personaSummary": "Voce e o Matheus, dono de uma marcenaria de moveis planejados premium no Rio. Trabalho de alto padrao, acabamento impecavel (@matheusmoveis). Voce ja roda Meta Ads e recebe indicac...",
+    "startStageId": 6
+  },
+  "agent": {
+    "promptId": "v6",
+    "promptHash": "ccb940dd9d29",
+    "mode": "single",
+    "setupId": null,
+    "setupName": null,
+    "model": "openai/gpt-oss-120b",
+    "reasoningEffort": null
+  },
+  "icpModel": "openai/gpt-oss-120b",
+  "params": {
+    "maxTurns": 25,
+    "agentTemperature": 0.6,
+    "icpTemperature": 0.8,
+    "maxCost": 0.15
+  },
+  "ficha": {
+    "nome": "Matheus",
+    "nicho": "Moveis planejados premium",
+    "regiao": "Rio de Janeiro",
+    "instagram": "@matheusmoveis",
+    "detalhe_para_elogio": "o acabamento da cozinha cinza com madeira, o encaixe limpo das portas sem puxador",
+    "decisor": "ele mesmo (proprietario unico)",
+    "observacoes": "Ja roda Meta Ads e recebe indicacao. Bons projetos no geral, conversao boa. Nivel de consciencia medio/alto."
+  },
+  "messages": [
+    {
+      "role": "agent",
+      "text": "Oi, tudo bem? Vi a cozinha cinza com madeira e o encaixe limpo das portas sem puxador, ficou incrível. Vamos transformar isso em ainda mais faturamento pra vocês? O que acha?",
+      "createdAt": "2026-06-11T00:29:51.443Z",
+      "toolCalls": [
+        {
+          "name": "update_deal_stage",
+          "displayName": "Update Deal_Stage",
+          "args": {
+            "stage_id": 21
+          },
+          "result": {
+            "ok": true,
+            "stage_id": 21,
+            "previous_stage_id": 6
+          },
+          "at": "2026-06-11T00:29:01.882Z"
+        },
+        {
+          "name": "create_person",
+          "displayName": "Create a person",
+          "args": {
+            "name": "Matheus",
+            "phone": ""
+          },
+          "result": {
+            "ok": true,
+            "person_id": 1001,
+            "name": "Matheus"
+          },
+          "at": "2026-06-11T00:29:01.882Z"
+        },
+        {
+          "name": "update_person_id",
+          "displayName": "Update Person_ID",
+          "args": {
+            "person_id": 1001
+          },
+          "result": {
+            "ok": true,
+            "deal_person_id": 1001,
+            "message": "Deal vinculado ao contato."
+          },
+          "at": "2026-06-11T00:29:01.882Z"
+        },
+        {
+          "name": "create_note",
+          "displayName": "Create a note",
+          "args": {
+            "content": "Primeiro contato: elogio ao acabamento da cozinha cinza com madeira e portas sem puxador."
+          },
+          "result": {
+            "ok": true,
+            "note_id": 1,
+            "content": "Primeiro contato: elogio ao acabamento da cozinha cinza com madeira e portas sem puxador."
+          },
+          "at": "2026-06-11T00:29:01.882Z"
+        }
+      ],
+      "thinking": "",
+      "model": "openai/gpt-oss-120b",
+      "roleId": "single",
+      "routerReason": null
+    },
+    {
+      "role": "lead",
+      "text": "Oi, tudo bem! Que massa que curtiu a cozinha. O que você tem em mente pra gente faturar mais? 🚀",
+      "createdAt": "2026-06-11T00:29:56.393Z"
+    },
+    {
+      "role": "agent",
+      "text": "Só pra confirmar, é você que cuida das decisões da sua marcenaria?",
+      "createdAt": "2026-06-11T00:30:19.297Z",
+      "toolCalls": [
+        {
+          "name": "update_deal_stage",
+          "displayName": "Update Deal_Stage",
+          "args": {
+            "stage_id": 7
+          },
+          "result": {
+            "ok": true,
+            "stage_id": 7,
+            "previous_stage_id": 21
+          },
+          "at": "2026-06-11T00:29:56.393Z"
+        },
+        {
+          "name": "create_note",
+          "displayName": "Create a note",
+          "args": {
+            "content": "Cliente quer ideias para faturar mais, perguntou o que pode fazer. Demonstrou interesse em site para aumentar vendas."
+          },
+          "result": {
+            "ok": true,
+            "note_id": 2,
+            "content": "Cliente quer ideias para faturar mais, perguntou o que pode fazer. Demonstrou interesse em site para aumentar vendas."
+          },
+          "at": "2026-06-11T00:29:56.393Z"
+        }
+      ],
+      "thinking": "",
+      "model": "openai/gpt-oss-120b",
+      "roleId": "single",
+      "routerReason": null
+    },
+    {
+      "role": "lead",
+      "text": "Exatamente, eu decido aqui na marcenaria. O que você tem em mente?",
+      "createdAt": "2026-06-11T00:30:20.355Z"
+    },
+    {
+      "role": "agent",
+      "text": "Boa! E me conta, qual seria a sua expectativa pra um site da sua marcenaria?",
+      "createdAt": "2026-06-11T00:30:28.924Z",
+      "toolCalls": [
+        {
+          "name": "create_note",
+          "displayName": "Create a note",
+          "args": {
+            "content": "Decisor confirmado: Matheus decide as decisões da marcenaria."
+          },
+          "result": {
+            "ok": true,
+            "note_id": 3,
+            "content": "Decisor confirmado: Matheus decide as decisões da marcenaria."
+          },
+          "at": "2026-06-11T00:30:20.355Z"
+        }
+      ],
+      "thinking": "",
+      "model": "openai/gpt-oss-120b",
+      "roleId": "single",
+      "routerReason": null
+    },
+    {
+      "role": "lead",
+      "text": "Um site top, com portfolio dos projetos, integração pro Meta Ads e um formulário de contato bem direto, seria ideal. Como você imagina isso? Qual seria a proposta (valor, prazo, como fechar)?",
+      "createdAt": "2026-06-11T00:30:34.995Z"
+    },
+    {
+      "role": "agent",
+      "text": "Legal, dá pra montar um site com portfolio, integração Meta Ads e um formulário direto, pronto em até duas semanas. O valor fica R$ 1.800 em até 12x ou R$ 1.500 à vista. Que tal marcarmos uma reunião de 30 min pra alinhar tudo? Posso te mandar o link pra escolher o horário?",
+      "createdAt": "2026-06-11T00:31:05.374Z",
+      "toolCalls": [
+        {
+          "name": "think",
+          "displayName": "Think",
+          "args": {
+            "input": "User wants proposal details (value, timeline, closing). According to flow, after expectation we should give brief overview and push to schedule a 30-min meeting. We should record note with expectation: site top, portfolio, Meta Ads integration, direct contact form. Then move deal to Apresentacao stage (9). Then respond with short message offering brief outline and asking to schedule meeting via link."
+          },
+          "result": {
+            "ok": true,
+            "note": "Pensamento registrado."
+          },
+          "at": "2026-06-11T00:30:34.995Z"
+        },
+        {
+          "name": "create_note",
+          "displayName": "Create a note",
+          "args": {
+            "content": "Cliente deseja site top com portfolio, integração Meta Ads e formulário de contato direto. Expectativa: site completo, prazo 2 semanas, valor R$1.800 em até 12x ou R$1.500 à vista."
+          },
+          "result": {
+            "ok": true,
+            "note_id": 4,
+            "content": "Cliente deseja site top com portfolio, integração Meta Ads e formulário de contato direto. Expectativa: site completo, prazo 2 semanas, valor R$1.800 em até 12x ou R$1.500 à vista."
+          },
+          "at": "2026-06-11T00:30:34.995Z"
+        },
+        {
+          "name": "update_deal_stage",
+          "displayName": "Update Deal_Stage",
+          "args": {
+            "stage_id": 9
+          },
+          "result": {
+            "ok": true,
+            "stage_id": 9,
+            "previous_stage_id": 7
+          },
+          "at": "2026-06-11T00:30:34.995Z"
+        }
+      ],
+      "thinking": "User wants proposal details (value, timeline, closing). According to flow, after expectation we should give brief overview and push to schedule a 30-min meeting. We should record note with expectation: site top, portfolio, Meta Ads integration, direct contact form. Then move deal to Apresentacao stage (9). Then respond with short message offering brief outline and asking to schedule meeting via link.",
+      "model": "openai/gpt-oss-120b",
+      "roleId": "single",
+      "routerReason": null
+    },
+    {
+      "role": "lead",
+      "text": "R$ 1.500 à vista já tá bem próximo, mas será que rola R$ 1.400 à vista se eu fechar agora? Como a gente faz o pagamento e o agendamento? 🚀",
+      "createdAt": "2026-06-11T00:31:07.076Z"
+    },
+    {
+      "role": "agent",
+      "text": "Show! Então a gente pode marcar uma reunião rápida de 30 min pra alinhar tudo, inclusive o valor e a forma de pagamento. Aqui está o link pra escolher o melhor horário: https://cal.com/matheus-simonaci-vieira/reuniao-de-website\n\nMe avisa quando marcar, beleza?",
+      "createdAt": "2026-06-11T00:31:20.345Z",
+      "toolCalls": [
+        {
+          "name": "create_note",
+          "displayName": "Create a note",
+          "args": {
+            "content": "Cliente pediu desconto: R$1.400 à vista ao invés de R$1.500. Preferir discutir condições na reunião."
+          },
+          "result": {
+            "ok": true,
+            "note_id": 5,
+            "content": "Cliente pediu desconto: R$1.400 à vista ao invés de R$1.500. Preferir discutir condições na reunião."
+          },
+          "at": "2026-06-11T00:31:07.076Z"
+        }
+      ],
+      "thinking": "",
+      "model": "openai/gpt-oss-120b",
+      "roleId": "single",
+      "routerReason": null
+    },
+    {
+      "role": "lead",
+      "text": "R$ 1.400 à vista, rola esse precinho? Se fechar assim já escolho o horário e faço o pagamento. 🚀",
+      "createdAt": "2026-06-11T00:31:23.842Z"
+    },
+    {
+      "role": "agent",
+      "text": "Entendi, a gente pode alinhar esse valor na reunião. Escolhe um horário no link e a gente finaliza tudo, beleza?",
+      "createdAt": "2026-06-11T00:31:37.600Z",
+      "toolCalls": [
+        {
+          "name": "create_note",
+          "displayName": "Create a note",
+          "args": {
+            "content": "Cliente pediu R$1.400 à vista, solicitando desconto. Valor padrão R$1.500 à vista ou R$1.800 em 12x. Direcionado para reunião para discutir condições."
+          },
+          "result": {
+            "ok": true,
+            "note_id": 6,
+            "content": "Cliente pediu R$1.400 à vista, solicitando desconto. Valor padrão R$1.500 à vista ou R$1.800 em 12x. Direcionado para reunião para discutir condições."
+          },
+          "at": "2026-06-11T00:31:23.842Z"
+        }
+      ],
+      "thinking": "",
+      "model": "openai/gpt-oss-120b",
+      "roleId": "single",
+      "routerReason": null
+    },
+    {
+      "role": "lead",
+      "text": "R$ 1.400 à vista tá perfeito pra fechar já. Me confirma esse valor e já agendo o horário. 🚀",
+      "createdAt": "2026-06-11T00:31:44.093Z"
+    },
+    {
+      "role": "agent",
+      "text": "R$ 1.400 à vista, a gente confirma na reunião. Escolhe um horário aqui: https://cal.com/matheus-simonaci-vieira/reuniao-de-website\n\nMe avisa quando marcar, beleza?",
+      "createdAt": "2026-06-11T00:31:59.251Z",
+      "toolCalls": [
+        {
+          "name": "create_note",
+          "displayName": "Create a note",
+          "args": {
+            "content": "Cliente pediu desconto para R$1.400 à vista, quer fechar agora. Registrar para discutir na reunião."
+          },
+          "result": {
+            "ok": true,
+            "note_id": 7,
+            "content": "Cliente pediu desconto para R$1.400 à vista, quer fechar agora. Registrar para discutir na reunião."
+          },
+          "at": "2026-06-11T00:31:44.093Z"
+        }
+      ],
+      "thinking": "",
+      "model": "openai/gpt-oss-120b",
+      "roleId": "single",
+      "routerReason": null
+    },
+    {
+      "role": "lead",
+      "text": "Confirma aí que o site vai ficar R$ 1.400 à vista mesmo? Se estiver ok já agendo o horário. 🚀",
+      "createdAt": "2026-06-11T00:32:14.070Z"
+    },
+    {
+      "role": "agent",
+      "text": "Vamos alinhar o valor de R$ 1.400 à vista na reunião, tudo certo? Escolhe o horário aqui: https://cal.com/matheus-simonaci-vieira/reuniao-de-website",
+      "createdAt": "2026-06-11T00:32:26.775Z",
+      "toolCalls": [
+        {
+          "name": "create_note",
+          "displayName": "Create a note",
+          "args": {
+            "content": "Cliente pediu R$1.400 à vista, desconto solicitado. Precisa ser discutido na reunião."
+          },
+          "result": {
+            "ok": true,
+            "note_id": 8,
+            "content": "Cliente pediu R$1.400 à vista, desconto solicitado. Precisa ser discutido na reunião."
+          },
+          "at": "2026-06-11T00:32:14.070Z"
+        }
+      ],
+      "thinking": "",
+      "model": "openai/gpt-oss-120b",
+      "roleId": "single",
+      "routerReason": null
+    },
+    {
+      "role": "lead",
+      "text": "Fechou, R$ 1.400 à vista tá certo. Vou escolher o horário agora e a gente já finaliza tudo. 🚀",
+      "createdAt": "2026-06-11T00:32:39.181Z"
+    }
+  ],
+  "toolCalls": [
+    {
+      "turn": 1,
+      "name": "update_deal_stage",
+      "displayName": "Update Deal_Stage",
+      "args": {
+        "stage_id": 21
+      },
+      "result": {
+        "ok": true,
+        "stage_id": 21,
+        "previous_stage_id": 6
+      },
+      "at": "2026-06-11T00:29:01.882Z"
+    },
+    {
+      "turn": 1,
+      "name": "create_person",
+      "displayName": "Create a person",
+      "args": {
+        "name": "Matheus",
+        "phone": ""
+      },
+      "result": {
+        "ok": true,
+        "person_id": 1001,
+        "name": "Matheus"
+      },
+      "at": "2026-06-11T00:29:01.882Z"
+    },
+    {
+      "turn": 1,
+      "name": "update_person_id",
+      "displayName": "Update Person_ID",
+      "args": {
+        "person_id": 1001
+      },
+      "result": {
+        "ok": true,
+        "deal_person_id": 1001,
+        "message": "Deal vinculado ao contato."
+      },
+      "at": "2026-06-11T00:29:01.882Z"
+    },
+    {
+      "turn": 1,
+      "name": "create_note",
+      "displayName": "Create a note",
+      "args": {
+        "content": "Primeiro contato: elogio ao acabamento da cozinha cinza com madeira e portas sem puxador."
+      },
+      "result": {
+        "ok": true,
+        "note_id": 1,
+        "content": "Primeiro contato: elogio ao acabamento da cozinha cinza com madeira e portas sem puxador."
+      },
+      "at": "2026-06-11T00:29:01.882Z"
+    },
+    {
+      "turn": 2,
+      "name": "update_deal_stage",
+      "displayName": "Update Deal_Stage",
+      "args": {
+        "stage_id": 7
+      },
+      "result": {
+        "ok": true,
+        "stage_id": 7,
+        "previous_stage_id": 21
+      },
+      "at": "2026-06-11T00:29:56.393Z"
+    },
+    {
+      "turn": 2,
+      "name": "create_note",
+      "displayName": "Create a note",
+      "args": {
+        "content": "Cliente quer ideias para faturar mais, perguntou o que pode fazer. Demonstrou interesse em site para aumentar vendas."
+      },
+      "result": {
+        "ok": true,
+        "note_id": 2,
+        "content": "Cliente quer ideias para faturar mais, perguntou o que pode fazer. Demonstrou interesse em site para aumentar vendas."
+      },
+      "at": "2026-06-11T00:29:56.393Z"
+    },
+    {
+      "turn": 3,
+      "name": "create_note",
+      "displayName": "Create a note",
+      "args": {
+        "content": "Decisor confirmado: Matheus decide as decisões da marcenaria."
+      },
+      "result": {
+        "ok": true,
+        "note_id": 3,
+        "content": "Decisor confirmado: Matheus decide as decisões da marcenaria."
+      },
+      "at": "2026-06-11T00:30:20.355Z"
+    },
+    {
+      "turn": 4,
+      "name": "think",
+      "displayName": "Think",
+      "args": {
+        "input": "User wants proposal details (value, timeline, closing). According to flow, after expectation we should give brief overview and push to schedule a 30-min meeting. We should record note with expectation: site top, portfolio, Meta Ads integration, direct contact form. Then move deal to Apresentacao stage (9). Then respond with short message offering brief outline and asking to schedule meeting via link."
+      },
+      "result": {
+        "ok": true,
+        "note": "Pensamento registrado."
+      },
+      "at": "2026-06-11T00:30:34.995Z"
+    },
+    {
+      "turn": 4,
+      "name": "create_note",
+      "displayName": "Create a note",
+      "args": {
+        "content": "Cliente deseja site top com portfolio, integração Meta Ads e formulário de contato direto. Expectativa: site completo, prazo 2 semanas, valor R$1.800 em até 12x ou R$1.500 à vista."
+      },
+      "result": {
+        "ok": true,
+        "note_id": 4,
+        "content": "Cliente deseja site top com portfolio, integração Meta Ads e formulário de contato direto. Expectativa: site completo, prazo 2 semanas, valor R$1.800 em até 12x ou R$1.500 à vista."
+      },
+      "at": "2026-06-11T00:30:34.995Z"
+    },
+    {
+      "turn": 4,
+      "name": "update_deal_stage",
+      "displayName": "Update Deal_Stage",
+      "args": {
+        "stage_id": 9
+      },
+      "result": {
+        "ok": true,
+        "stage_id": 9,
+        "previous_stage_id": 7
+      },
+      "at": "2026-06-11T00:30:34.995Z"
+    },
+    {
+      "turn": 5,
+      "name": "create_note",
+      "displayName": "Create a note",
+      "args": {
+        "content": "Cliente pediu desconto: R$1.400 à vista ao invés de R$1.500. Preferir discutir condições na reunião."
+      },
+      "result": {
+        "ok": true,
+        "note_id": 5,
+        "content": "Cliente pediu desconto: R$1.400 à vista ao invés de R$1.500. Preferir discutir condições na reunião."
+      },
+      "at": "2026-06-11T00:31:07.076Z"
+    },
+    {
+      "turn": 6,
+      "name": "create_note",
+      "displayName": "Create a note",
+      "args": {
+        "content": "Cliente pediu R$1.400 à vista, solicitando desconto. Valor padrão R$1.500 à vista ou R$1.800 em 12x. Direcionado para reunião para discutir condições."
+      },
+      "result": {
+        "ok": true,
+        "note_id": 6,
+        "content": "Cliente pediu R$1.400 à vista, solicitando desconto. Valor padrão R$1.500 à vista ou R$1.800 em 12x. Direcionado para reunião para discutir condições."
+      },
+      "at": "2026-06-11T00:31:23.842Z"
+    },
+    {
+      "turn": 7,
+      "name": "create_note",
+      "displayName": "Create a note",
+      "args": {
+        "content": "Cliente pediu desconto para R$1.400 à vista, quer fechar agora. Registrar para discutir na reunião."
+      },
+      "result": {
+        "ok": true,
+        "note_id": 7,
+        "content": "Cliente pediu desconto para R$1.400 à vista, quer fechar agora. Registrar para discutir na reunião."
+      },
+      "at": "2026-06-11T00:31:44.093Z"
+    },
+    {
+      "turn": 8,
+      "name": "create_note",
+      "displayName": "Create a note",
+      "args": {
+        "content": "Cliente pediu R$1.400 à vista, desconto solicitado. Precisa ser discutido na reunião."
+      },
+      "result": {
+        "ok": true,
+        "note_id": 8,
+        "content": "Cliente pediu R$1.400 à vista, desconto solicitado. Precisa ser discutido na reunião."
+      },
+      "at": "2026-06-11T00:32:14.070Z"
+    }
+  ],
+  "routing": [
+    {
+      "turn": 1,
+      "roleId": "single",
+      "model": "openai/gpt-oss-120b",
+      "reason": null,
+      "fallback": false,
+      "routerModel": null,
+      "routerCost": 0,
+      "agentCost": 0.00192713301
+    },
+    {
+      "turn": 2,
+      "roleId": "single",
+      "model": "openai/gpt-oss-120b",
+      "reason": null,
+      "fallback": false,
+      "routerModel": null,
+      "routerCost": 0,
+      "agentCost": 0.00121438053
+    },
+    {
+      "turn": 3,
+      "roleId": "single",
+      "model": "openai/gpt-oss-120b",
+      "reason": null,
+      "fallback": false,
+      "routerModel": null,
+      "routerCost": 0,
+      "agentCost": 0.00076118823
+    },
+    {
+      "turn": 4,
+      "roleId": "single",
+      "model": "openai/gpt-oss-120b",
+      "reason": null,
+      "fallback": false,
+      "routerModel": null,
+      "routerCost": 0,
+      "agentCost": 0.00161906382
+    },
+    {
+      "turn": 5,
+      "roleId": "single",
+      "model": "openai/gpt-oss-120b",
+      "reason": null,
+      "fallback": false,
+      "routerModel": null,
+      "routerCost": 0,
+      "agentCost": 0.0008112901499999999
+    },
+    {
+      "turn": 6,
+      "roleId": "single",
+      "model": "openai/gpt-oss-120b",
+      "reason": null,
+      "fallback": false,
+      "routerModel": null,
+      "routerCost": 0,
+      "agentCost": 0.00083221083
+    },
+    {
+      "turn": 7,
+      "roleId": "single",
+      "model": "openai/gpt-oss-120b",
+      "reason": null,
+      "fallback": false,
+      "routerModel": null,
+      "routerCost": 0,
+      "agentCost": 0.00084450465
+    },
+    {
+      "turn": 8,
+      "roleId": "single",
+      "model": "openai/gpt-oss-120b",
+      "reason": null,
+      "fallback": false,
+      "routerModel": null,
+      "routerCost": 0,
+      "agentCost": 0.00084664701
+    }
+  ],
+  "cost": {
+    "total": 0.010967,
+    "byComponent": {
+      "single": 0.008856,
+      "icp": 0.002111
+    },
+    "byModel": {
+      "openai/gpt-oss-120b": 0.010967
+    },
+    "tokensByModel": {
+      "openai/gpt-oss-120b": {
+        "prompt": 221083,
+        "completion": 7457
+      }
+    },
+    "currency": "USD"
+  },
+  "crmFinalState": {
+    "stageId": 9,
+    "stageName": "Apresentacao",
+    "person": {
+      "id": 1001,
+      "name": "Matheus",
+      "phone": ""
+    },
+    "notes": [
+      {
+        "content": "Primeiro contato: elogio ao acabamento da cozinha cinza com madeira e portas sem puxador.",
+        "at": "2026-06-11T00:29:01.882Z"
+      },
+      {
+        "content": "Cliente quer ideias para faturar mais, perguntou o que pode fazer. Demonstrou interesse em site para aumentar vendas.",
+        "at": "2026-06-11T00:29:56.393Z"
+      },
+      {
+        "content": "Decisor confirmado: Matheus decide as decisões da marcenaria.",
+        "at": "2026-06-11T00:30:20.355Z"
+      },
+      {
+        "content": "Cliente deseja site top com portfolio, integração Meta Ads e formulário de contato direto. Expectativa: site completo, prazo 2 semanas, valor R$1.800 em até 12x ou R$1.500 à vista.",
+        "at": "2026-06-11T00:30:34.995Z"
+      },
+      {
+        "content": "Cliente pediu desconto: R$1.400 à vista ao invés de R$1.500. Preferir discutir condições na reunião.",
+        "at": "2026-06-11T00:31:07.076Z"
+      },
+      {
+        "content": "Cliente pediu R$1.400 à vista, solicitando desconto. Valor padrão R$1.500 à vista ou R$1.800 em 12x. Direcionado para reunião para discutir condições.",
+        "at": "2026-06-11T00:31:23.842Z"
+      },
+      {
+        "content": "Cliente pediu desconto para R$1.400 à vista, quer fechar agora. Registrar para discutir na reunião.",
+        "at": "2026-06-11T00:31:44.093Z"
+      },
+      {
+        "content": "Cliente pediu R$1.400 à vista, desconto solicitado. Precisa ser discutido na reunião.",
+        "at": "2026-06-11T00:32:14.070Z"
+      }
+    ],
+    "activities": [],
+    "contactHumanMessages": [],
+    "iaDisabled": false,
+    "escalated": false
+  },
+  "outcome": {
+    "endReason": "closed",
+    "decision": "closed",
+    "closed": true,
+    "budgetExceeded": false,
+    "turns": 8,
+    "reachedStageId": 9,
+    "reachedStageName": "Apresentacao",
+    "escalated": false,
+    "iaDisabled": false,
+    "totalCost": 0.010967
+  },
+  "metrics": {
+    "toolCounts": {
+      "Update Deal_Stage": 3,
+      "Create a person": 1,
+      "Update Person_ID": 1,
+      "Create a note": 8,
+      "Think": 1
+    },
+    "noteCount": 8,
+    "activityCount": 0,
+    "agentMessages": 8,
+    "leadMessages": 8,
+    "turnsByRole": {
+      "single": 8
+    },
+    "costTotal": 0.010967,
+    "costByModel": {
+      "openai/gpt-oss-120b": 0.010967
+    }
+  }
+}

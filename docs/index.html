@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  Nome da ferramenta e URLs: definidos em SITE_CONFIG (fim do arquivo).
+  O <title> e a <meta name="description"> precisam ser trocados à mão se o nome mudar.
+  Design system: 4virtue (dark, warm champagne) — tokens de design-system/colors_and_type.css.
+  ?static=1 desliga as animações (útil para screenshot).
+-->
+<title>Sparring — seu vendedor de IA treina aqui antes do primeiro cliente real</title>
+<meta name="description" content="Ferramenta open source que cria clientes simulados para negociar com o seu agente de IA — você vê onde ele erra, e quanto custa cada conversa, antes do primeiro lead de verdade.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Outfit:wght@300;400;500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  /* ========= tokens (4virtue design system) ========= */
+  :root{
+    --bg:#060605; --bg-deep:#000000; --bg-raised:#100F0D;
+    --surface-1:#15140F; --surface-2:#1C1A14; --surface-3:#262219;
+    --line:rgba(244,239,230,.08); --line-strong:rgba(244,239,230,.16); --line-faint:rgba(244,239,230,.045);
+    --fg:#F4EFE6; --fg-strong:#FFFFFF; --fg-muted:#A39C8F; --fg-faint:#6E685D; --fg-ghost:#443F38;
+    --fg-on-light:#1A140C;
+    --accent:#C9A87E; --accent-bright:#E7CFA8; --accent-deep:#8C7150;
+    --accent-tint:rgba(201,168,126,.12); --accent-line:rgba(201,168,126,.34);
+    --positive:#8FB996;
+    --font-sans:"Outfit","Helvetica Neue",Arial,sans-serif;
+    --font-serif:"Newsreader",Georgia,serif;
+    --font-script:"Pinyon Script",cursive;
+    --font-mono:"JetBrains Mono",Menlo,monospace;
+    --step-hero:clamp(2.9rem,6.4vw,5.6rem);
+    --step-d2:clamp(1.75rem,3.2vw,2.75rem);
+    --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    --ease-out:cubic-bezier(.22,1,.36,1);
+    --t-fast:160ms; --t-base:280ms; --t-slow:560ms; --t-cine:900ms;
+    --shadow-md:0 8px 30px rgba(0,0,0,.55);
+    --shadow-glow:0 0 0 1px var(--line-strong),0 0 70px rgba(201,168,126,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:var(--font-sans);font-size:1rem;font-weight:400;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent);color:var(--fg-on-light)}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+  a{color:var(--accent);text-decoration:none}
+
+  .eyebrow{
+    font-family:var(--font-mono);font-size:.6875rem;font-weight:500;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--accent);
+  }
+  .eyebrow .idx{color:var(--fg-faint)}
+
+  /* ========= header ========= */
+  header{
+    position:fixed;inset:0 0 auto 0;z-index:50;
+    background:rgba(6,6,5,.7);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar{display:flex;justify-content:space-between;align-items:center;height:64px}
+  .brand{font-family:var(--font-mono);font-size:.8125rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--fg)}
+  .top-link{
+    font-size:.875rem;font-weight:500;color:var(--fg);
+    border:1px solid var(--line-strong);border-radius:var(--r-pill);padding:9px 22px;
+    transition:border-color var(--t-base) var(--ease-out),color var(--t-base) var(--ease-out),transform var(--t-base) var(--ease-out),box-shadow var(--t-base) var(--ease-out);
+  }
+  .top-link:hover{border-color:var(--accent-line);color:var(--accent-bright);transform:translateY(-1px);box-shadow:0 0 40px rgba(201,168,126,.10)}
+
+  /* ========= hero ========= */
+  .hero{position:relative;padding:176px 0 128px;overflow:hidden}
+  .hero::before{
+    content:"";position:absolute;top:-220px;left:50%;transform:translateX(-50%);
+    width:1100px;height:760px;pointer-events:none;
+    background:radial-gradient(60% 60% at 50% 40%,rgba(201,168,126,.16) 0%,rgba(201,168,126,0) 70%);
+  }
+  .hero-inner{position:relative;max-width:840px}
+  .hero h1{
+    font-family:var(--font-serif);font-size:var(--step-hero);font-weight:500;
+    line-height:1.04;letter-spacing:-.02em;color:var(--fg);margin-top:22px;
+  }
+  .hero h1 em{font-style:italic;color:var(--accent-bright)}
+  .hero .lead{
+    font-size:1.125rem;line-height:1.75;color:var(--fg-muted);
+    max-width:58ch;margin-top:28px;
+  }
+  .hero .lead strong{color:var(--fg);font-weight:500}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:44px;align-items:center}
+  .btn{
+    display:inline-block;font-size:.9375rem;font-weight:500;border-radius:var(--r-pill);
+    padding:14px 30px;cursor:pointer;
+    transition:transform var(--t-base) var(--ease-out),box-shadow var(--t-base) var(--ease-out),border-color var(--t-base) var(--ease-out),color var(--t-base) var(--ease-out),background var(--t-base) var(--ease-out);
+  }
+  .btn:active{transform:translateY(0) scale(.99)}
+  .btn-primary{background:var(--accent);color:var(--fg-on-light)}
+  .btn-primary:hover{background:var(--accent-bright);transform:translateY(-1px);box-shadow:0 0 60px rgba(201,168,126,.22)}
+  .btn-ghost{color:var(--fg);border:1px solid var(--line-strong);background:transparent}
+  .btn-ghost:hover{border-color:var(--accent-line);color:var(--accent-bright);transform:translateY(-1px)}
+  .hero-note{font-size:.8125rem;color:var(--fg-faint);margin-top:20px}
+
+  /* ========= sections ========= */
+  section{padding:112px 0}
+  .sec-head{max-width:620px;margin-bottom:56px}
+  .sec-title{
+    font-family:var(--font-serif);font-size:var(--step-d2);font-weight:500;
+    line-height:1.18;letter-spacing:-.02em;color:var(--fg);margin-top:18px;
+  }
+  .sec-body{color:var(--fg-muted);margin-top:16px;line-height:1.75}
+
+  /* ========= replay (treinamento ao vivo) ========= */
+  #replay{background:var(--bg-raised);border-top:1px solid var(--line);border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+  #replay::after{
+    content:"";position:absolute;right:-260px;top:10%;width:820px;height:820px;pointer-events:none;
+    background:radial-gradient(60% 60% at 50% 40%,rgba(201,168,126,.10) 0%,rgba(201,168,126,0) 70%);
+  }
+  .replay-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:64px;align-items:start;position:relative;z-index:1}
+  .replay-side p{color:var(--fg-muted);margin-top:18px;line-height:1.75;font-size:.9375rem}
+  .replay-side p strong{color:var(--fg);font-weight:500}
+  .replay-side .cost-line{
+    font-family:var(--font-mono);font-size:.8125rem;color:var(--accent);
+    border-top:1px solid var(--line);margin-top:28px;padding-top:20px;
+  }
+  .replay-btn{
+    margin-top:26px;display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--font-mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--fg-muted);background:transparent;border:1px solid var(--line-strong);
+    border-radius:var(--r-pill);padding:10px 20px;cursor:pointer;
+    transition:border-color var(--t-base) var(--ease-out),color var(--t-base) var(--ease-out),transform var(--t-base) var(--ease-out);
+  }
+  .replay-btn:hover{border-color:var(--accent-line);color:var(--accent-bright);transform:translateY(-1px)}
+  .replay-btn::before{content:"↺";font-size:.9rem;color:var(--accent)}
+
+  .chat{
+    background:var(--surface-1);border:1px solid var(--line);border-radius:var(--r-lg);
+    overflow:hidden;box-shadow:var(--shadow-glow);
+  }
+  .chat-head{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:14px 18px;border-bottom:1px solid var(--line);background:var(--surface-2);
+  }
+  .chat-id{display:flex;align-items:center;gap:12px;min-width:0}
+  .avatar{
+    width:38px;height:38px;border-radius:50%;flex:none;
+    background:var(--accent-tint);border:1px solid var(--accent-line);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-serif);font-size:1.05rem;font-weight:500;
+  }
+  .chat-id b{font-size:.875rem;font-weight:500;display:block;line-height:1.3;color:var(--fg)}
+  .chat-id small{font-size:.75rem;color:var(--fg-faint)}
+  .cost-pill{
+    font-family:var(--font-mono);font-size:.75rem;font-weight:500;color:var(--accent);
+    border:1px solid var(--accent-line);background:var(--accent-tint);
+    border-radius:var(--r-pill);padding:5px 14px;white-space:nowrap;font-variant-numeric:tabular-nums;
+  }
+  .chat-body{
+    padding:20px 18px;display:flex;flex-direction:column;gap:12px;
+    height:540px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--surface-3) transparent;
+  }
+  .chat-body::-webkit-scrollbar{width:6px}
+  .chat-body::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:99px}
+
+  .who{
+    font-family:var(--font-mono);font-size:.625rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--fg-faint);margin-bottom:-4px;
+  }
+  .who.agent{align-self:flex-end}
+  .msg{
+    max-width:84%;padding:11px 15px;border-radius:var(--r-md);
+    font-size:.9rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:break-word;color:var(--fg);
+  }
+  .msg.agent{align-self:flex-end;background:var(--accent-tint);border:1px solid var(--accent-line);border-bottom-right-radius:4px}
+  .msg.lead{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:4px;color:var(--fg-muted)}
+  .tools{display:flex;gap:6px;flex-wrap:wrap;align-self:flex-end;justify-content:flex-end;max-width:84%}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--font-mono);font-size:.6875rem;font-weight:500;color:var(--accent);
+    border:1px solid var(--accent-line);border-radius:var(--r-pill);padding:3px 11px;background:rgba(201,168,126,.06);
+  }
+  .chip::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(201,168,126,.8)}
+  .chat-skip{align-self:center;font-family:var(--font-mono);font-size:.6875rem;color:var(--fg-ghost);padding:4px 0;letter-spacing:.08em}
+
+  /* animação de entrada das bolhas */
+  .anim .msg,.anim .tools,.anim .who,.anim .chat-skip{
+    opacity:0;transform:translateY(14px);
+    transition:opacity var(--t-slow) var(--ease-out),transform var(--t-slow) var(--ease-out);
+  }
+  .anim .msg.in,.anim .tools.in,.anim .who.in,.anim .chat-skip.in{opacity:1;transform:none}
+
+  .typing{
+    align-self:flex-start;display:none;gap:5px;align-items:center;
+    background:var(--surface-2);border:1px solid var(--line);
+    border-radius:var(--r-md);border-bottom-left-radius:4px;padding:13px 16px;
+  }
+  .typing.agent-side{align-self:flex-end;background:var(--accent-tint);border-color:var(--accent-line);border-bottom-left-radius:var(--r-md);border-bottom-right-radius:4px}
+  .typing.show{display:inline-flex}
+  .typing i{width:6px;height:6px;border-radius:50%;background:var(--fg-faint);animation:tdot 1s infinite var(--ease-out)}
+  .typing.agent-side i{background:var(--accent)}
+  .typing i:nth-child(2){animation-delay:.15s}
+  .typing i:nth-child(3){animation-delay:.3s}
+  @keyframes tdot{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+  .chat-end{display:flex;justify-content:center;padding:16px;border-top:1px solid var(--line);background:var(--surface-2)}
+  .outcome{
+    font-family:var(--font-mono);font-size:.8125rem;font-weight:600;
+    color:var(--fg-on-light);background:var(--accent);border-radius:var(--r-pill);padding:9px 22px;
+    box-shadow:0 0 50px rgba(201,168,126,.25);
+  }
+  .anim .outcome{opacity:0;transform:translateY(10px) scale(.96);transition:opacity var(--t-cine) var(--ease-out),transform var(--t-cine) var(--ease-out)}
+  .anim .outcome.in{opacity:1;transform:none}
+
+  /* ========= como funciona ========= */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .step{
+    background:var(--surface-1);border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:32px 28px;position:relative;
+    transition:transform var(--t-base) var(--ease-out),border-color var(--t-base) var(--ease-out),box-shadow var(--t-base) var(--ease-out);
+  }
+  .step::before{
+    content:"";position:absolute;top:0;left:28px;right:28px;height:1px;
+    background:linear-gradient(90deg,var(--accent-line),transparent);
+    opacity:0;transition:opacity var(--t-base) var(--ease-out);
+  }
+  .step:hover{transform:translateY(-1px);border-color:var(--line-strong);box-shadow:0 0 60px rgba(201,168,126,.07)}
+  .step:hover::before{opacity:1}
+  .step .idx{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.04em;color:var(--accent)}
+  .step h3{font-size:1.125rem;font-weight:500;letter-spacing:0;margin:14px 0 10px;color:var(--fg)}
+  .step p{font-size:.9rem;color:var(--fg-muted);line-height:1.7}
+
+  /* ========= vídeo ========= */
+  #demo{background:var(--bg-deep);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .video-frame{
+    border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
+    box-shadow:var(--shadow-md),0 0 90px rgba(201,168,126,.06);background:var(--bg-deep);
+  }
+  .video-frame video{width:100%;display:block;background:var(--bg-deep)}
+  .video-caption{font-size:.8125rem;color:var(--fg-faint);margin-top:16px}
+
+  /* ========= caso real ========= */
+  .case-card{
+    background:var(--surface-1);border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:40px 44px;max-width:780px;position:relative;box-shadow:var(--shadow-glow);
+  }
+  .case-card::before{
+    content:"";position:absolute;top:0;left:44px;width:120px;height:1px;
+    background:linear-gradient(90deg,var(--accent),transparent);
+  }
+  .case-card p{font-family:var(--font-serif);font-size:1.25rem;line-height:1.6;color:var(--fg);font-weight:400}
+  .case-card .src{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-faint);margin-top:22px}
+
+  /* ========= para quem é ========= */
+  .fit{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .fit-card{background:var(--surface-1);border:1px solid var(--line);border-radius:var(--r-lg);padding:32px}
+  .fit-card h3{font-size:.8125rem;font-family:var(--font-mono);font-weight:500;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}
+  .fit-card.yes h3{color:var(--accent)}
+  .fit-card.no h3{color:var(--fg-faint)}
+  .fit-card ul{list-style:none}
+  .fit-card li{font-size:.9rem;color:var(--fg-muted);padding:8px 0 8px 26px;position:relative;line-height:1.6}
+  .fit-card li::before{position:absolute;left:0;top:8px;font-family:var(--font-mono)}
+  .fit-card.yes li::before{content:"+";color:var(--accent)}
+  .fit-card.no li::before{content:"—";color:var(--fg-ghost)}
+
+  /* ========= como rodar ========= */
+  .terminal{
+    background:var(--bg-deep);border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:26px 28px;font-family:var(--font-mono);font-size:.875rem;line-height:2;
+    overflow-x:auto;box-shadow:var(--shadow-glow);
+  }
+  .terminal .c{color:var(--fg-faint)}
+  .terminal .p{color:var(--accent);user-select:none}
+  .run-note{font-size:.875rem;color:var(--fg-muted);margin-top:18px;max-width:64ch}
+
+  /* ========= footer ========= */
+  footer{border-top:1px solid var(--line);padding:44px 0 72px}
+  .foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  .foot p{font-size:.8125rem;color:var(--fg-faint)}
+  .foot nav{display:flex;gap:24px}
+  .foot a{font-size:.8125rem;font-weight:500;color:var(--fg-muted);transition:color var(--t-base) var(--ease-out)}
+  .foot a:hover{color:var(--accent-bright)}
+
+  /* ========= reveal on scroll ========= */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity var(--t-cine) var(--ease-out),transform var(--t-cine) var(--ease-out)}
+  .reveal.is-visible{opacity:1;transform:none}
+  .reveal[data-delay="1"]{transition-delay:.08s}
+  .reveal[data-delay="2"]{transition-delay:.16s}
+  .reveal[data-delay="3"]{transition-delay:.24s}
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .reveal,.anim .msg,.anim .tools,.anim .who,.anim .chat-skip,.anim .outcome{opacity:1;transform:none;transition:none}
+    .btn,.step,.top-link,.replay-btn{transition:none}
+    .typing i{animation:none}
+  }
+
+  /* ========= responsivo ========= */
+  @media (max-width:920px){
+    .steps{grid-template-columns:1fr}
+    .replay-grid{grid-template-columns:1fr;gap:40px}
+    .fit{grid-template-columns:1fr}
+    section{padding:88px 0}
+    .hero{padding:140px 0 96px}
+  }
+  @media (max-width:480px){
+    .msg{max-width:92%}
+    .chat-body{height:460px}
+    .cta-row .btn{width:100%;text-align:center}
+    .case-card{padding:30px 26px}
+    .case-card::before{left:26px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap topbar">
+    <span class="brand js-name">Sparring</span>
+    <a class="top-link js-github" href="#" rel="noopener">GitHub →</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <div class="wrap hero">
+    <div class="hero-inner">
+      <p class="eyebrow"><span class="idx">001 /</span> open source · grátis · roda na sua máquina</p>
+      <h1>Seu vendedor de IA já negociou com alguém <em>antes do seu cliente?</em></h1>
+      <p class="lead">
+        A maioria coloca agente de IA pra atender no feeling — e descobre o erro na conversa errada,
+        com o cliente errado. O <span class="js-name">Sparring</span> cria clientes simulados que conversam,
+        pechincham e desistem como gente de verdade, pra você ver onde o seu agente erra
+        <strong>antes do primeiro lead real</strong>.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary js-github" href="#" rel="noopener">Ver no GitHub</a>
+        <a class="btn btn-ghost" href="#replay">Ver o treinamento</a>
+      </div>
+      <p class="hero-note">Sem cadastro, sem mensalidade. É uma ferramenta que me foi útil — talvez sirva pra você também.</p>
+    </div>
+  </div>
+
+  <!-- REPLAY ANIMADO -->
+  <section id="replay">
+    <div class="wrap replay-grid">
+      <div class="replay-side">
+        <p class="eyebrow reveal"><span class="idx">002 /</span> o treinamento, ao vivo</p>
+        <h2 class="sec-title reveal">Isto não é mockup. É um cliente simulado negociando.</h2>
+        <p class="reveal">O "Matheus" da conversa ao lado é um dono de marcenaria que não existe: é um perfil
+          simulado, configurado pra negociar preço antes de fechar. O agente de IA do outro lado não sabe disso.</p>
+        <p class="reveal">As etiquetas douradas são as ações que o agente executou no CRM (simulado) durante a
+          conversa — mover o negócio de etapa, registrar anotações. Tudo fica salvo num relatório por conversa.</p>
+        <p class="reveal">Errar aqui custa centavos. Errar com cliente de verdade custa o cliente.</p>
+        <p class="cost-line reveal">custo real desta conversa: <strong>US$ 0,0110</strong></p>
+        <button class="replay-btn reveal" id="replay-again" type="button">assistir de novo</button>
+      </div>
+
+      <div class="chat reveal" id="chat" aria-label="Transcrição real de conversa entre agente de IA e cliente simulado (trecho)">
+        <div class="chat-head">
+          <div class="chat-id">
+            <span class="avatar" aria-hidden="true">M</span>
+            <span><b>Matheus, marcenaria</b><small>cliente simulado · móveis planejados</small></span>
+          </div>
+          <span class="cost-pill" id="cost-pill">custo $0.0000</span>
+        </div>
+        <div class="chat-body" id="chat-body" aria-live="polite"></div>
+        <div class="chat-end">
+          <span class="outcome" id="outcome">[FECHOU] · 8 turnos · custo real US$ 0,011</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="wrap" id="como-funciona">
+    <div class="sec-head">
+      <p class="eyebrow reveal"><span class="idx">003 /</span> como funciona</p>
+      <h2 class="sec-title reveal">Três passos. Nenhum cliente real envolvido.</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal" data-delay="1">
+        <span class="idx">01</span>
+        <h3>Você descreve seus clientes típicos</h3>
+        <p>O que pechincha, o cético, o que diz "depois te falo". Cada perfil vira um cliente simulado, com jeito e objeções próprias.</p>
+      </div>
+      <div class="step reveal" data-delay="2">
+        <span class="idx">02</span>
+        <h3>Eles negociam com o seu agente</h3>
+        <p>Conversa de verdade, mensagem a mensagem: preço, objeção, fechamento ou recusa. O agente usa o CRM como usaria em produção — só que simulado.</p>
+      </div>
+      <div class="step reveal" data-delay="3">
+        <span class="idx">03</span>
+        <h3>Você lê o relatório antes de ir pro ar</h3>
+        <p>O que o agente respondeu, que ações tomou e quanto custou cada conversa, em centavos. Aí sim você decide se ele está pronto.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section id="demo">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow reveal"><span class="idx">004 /</span> demo em 45 segundos</p>
+        <h2 class="sec-title reveal">Uma conversa real, do oi ao fechamento.</h2>
+      </div>
+      <div class="video-frame reveal">
+        <video controls preload="metadata" playsinline src="demo.mp4" poster="poster.png">
+          Seu navegador não reproduz vídeo. Baixe o demo no repositório.
+        </video>
+      </div>
+      <p class="video-caption reveal">O replay do vídeo usa a mesma conversa real da seção acima — gerada pela ferramenta, sem edição de texto.</p>
+    </div>
+  </section>
+
+  <!-- CASO REAL -->
+  <section class="wrap" id="case">
+    <div class="sec-head">
+      <p class="eyebrow reveal"><span class="idx">005 /</span> uso real</p>
+    </div>
+    <div class="case-card reveal">
+      <p>
+        Eu construí isso pra mim. Na 4virtue, meu estúdio de sites, o agente que faz a prospecção
+        por WhatsApp passou por dezenas dessas conversas simuladas antes de falar com o primeiro
+        lead de verdade — foi assim que achei respostas ruins, ajustei o prompt e medi quanto cada
+        conversa custava. Publico a ferramenta porque ela me foi útil. Se ela te poupar uma conversa
+        ruim com um cliente real, já valeu.
+      </p>
+      <p class="src">Matheus · 4virtue</p>
+    </div>
+  </section>
+
+  <!-- PARA QUEM É -->
+  <section class="wrap" id="para-quem">
+    <div class="sec-head">
+      <p class="eyebrow reveal"><span class="idx">006 /</span> combina com você?</p>
+      <h2 class="sec-title reveal">Uma conversa honesta antes de você clonar o repositório.</h2>
+    </div>
+    <div class="fit">
+      <div class="fit-card yes reveal" data-delay="1">
+        <h3>Faz sentido se você…</h3>
+        <ul>
+          <li>usa (ou vai usar) agente de IA pra vender ou atender no WhatsApp;</li>
+          <li>quer ver o agente errando em conversa simulada, não na frente do cliente;</li>
+          <li>quer saber quanto custa cada conversa antes de escalar;</li>
+          <li>tem alguém minimamente técnico por perto — ou paciência pra seguir um README.</li>
+        </ul>
+      </div>
+      <div class="fit-card no reveal" data-delay="2">
+        <h3>Não é pra você se espera…</h3>
+        <ul>
+          <li>um SaaS com botão de cadastro — é código aberto, roda na sua máquina;</li>
+          <li>suporte comercial ou consultoria — não tem, é um projeto publicado de boa vontade;</li>
+          <li>que a ferramenta conserte o agente sozinha — ela mostra onde ele erra; quem ajusta é você;</li>
+          <li>resultado sem configurar nada — descrever bem seus clientes típicos é parte do trabalho.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO RODAR -->
+  <section class="wrap" id="como-rodar">
+    <div class="sec-head">
+      <p class="eyebrow reveal"><span class="idx">007 /</span> pra quem vai rodar</p>
+      <h2 class="sec-title reveal">Quatro linhas no terminal.</h2>
+    </div>
+    <div class="terminal reveal" role="region" aria-label="Comandos de instalação">
+      <div><span class="p">$</span> git clone <span class="js-github-url">https://github.com/MatheusSimonaci/sparring</span></div>
+      <div><span class="p">$</span> cd sparring</div>
+      <div><span class="p">$</span> copy .env.example .env   <span class="c"># cole sua chave do OpenRouter (no Mac/Linux: cp)</span></div>
+      <div><span class="p">$</span> npm start                <span class="c"># abre a interface no navegador</span></div>
+    </div>
+    <p class="run-note reveal">
+      Precisa só do Node.js instalado — a ferramenta não tem dependências externas.
+      O passo a passo completo (criar clientes simulados, rodar pela linha de comando, ler os relatórios)
+      está no <a class="js-github" href="#" rel="noopener">README do repositório</a>.
+    </p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <p>feito por Matheus · usado de verdade na 4virtue · licença MIT</p>
+    <nav>
+      <a class="js-github" href="#" rel="noopener">GitHub</a>
+      <a class="js-linkedin" href="#" rel="noopener">LinkedIn</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  // ——— configuração única do site: troque aqui e tudo acompanha ———
+  const SITE_CONFIG = {
+    toolName: "Sparring",
+    githubUrl: "https://github.com/MatheusSimonaci/sparring",
+    linkedinUrl: "https://www.linkedin.com/in/matheus-simonaci-vieira",
+  };
+
+  document.querySelectorAll(".js-name").forEach((el) => { el.textContent = SITE_CONFIG.toolName; });
+  document.querySelectorAll(".js-github").forEach((el) => { el.href = SITE_CONFIG.githubUrl; });
+  document.querySelectorAll(".js-github-url").forEach((el) => { el.textContent = SITE_CONFIG.githubUrl; });
+  document.querySelectorAll(".js-linkedin").forEach((el) => { el.href = SITE_CONFIG.linkedinUrl; });
+
+  // ——— dados do replay: trecho VERBATIM de uma conversa real gerada pela
+  //     ferramenta (run 20260611-002901_moveis-meta-ads). Nada inventado;
+  //     o corte da negociação é sinalizado pelo marcador "skip". ———
+  const TOTAL_COST = 0.0110; // US$, medido pelo OpenRouter
+  const EVENTS = [
+    { role: "agent", text: "Oi, tudo bem? Vi a cozinha cinza com madeira e o encaixe limpo das portas sem puxador, ficou incrível. Vamos transformar isso em ainda mais faturamento pra vocês? O que acha?", tools: ["update_deal_stage", "create_person", "create_note"] },
+    { role: "lead",  text: "Oi, tudo bem! Que massa que curtiu a cozinha. O que você tem em mente pra gente faturar mais? 🚀" },
+    { role: "agent", text: "Só pra confirmar, é você que cuida das decisões da sua marcenaria?", tools: ["update_deal_stage", "create_note"] },
+    { role: "lead",  text: "Exatamente, eu decido aqui na marcenaria. O que você tem em mente?" },
+    { role: "agent", text: "Boa! E me conta, qual seria a sua expectativa pra um site da sua marcenaria?" },
+    { role: "lead",  text: "Um site top, com portfolio dos projetos, integração pro Meta Ads e um formulário de contato bem direto, seria ideal. Como você imagina isso? Qual seria a proposta (valor, prazo, como fechar)?" },
+    { role: "agent", text: "Legal, dá pra montar um site com portfolio, integração Meta Ads e um formulário direto, pronto em até duas semanas. O valor fica R$ 1.800 em até 12x ou R$ 1.500 à vista. Que tal marcarmos uma reunião de 30 min pra alinhar tudo?", tools: ["think", "create_note", "update_deal_stage"] },
+    { role: "lead",  text: "R$ 1.500 à vista já tá bem próximo, mas será que rola R$ 1.400 à vista se eu fechar agora? Como a gente faz o pagamento e o agendamento? 🚀" },
+    { role: "agent", text: "Entendi, a gente pode alinhar esse valor na reunião. Escolhe um horário no link e a gente finaliza tudo, beleza?", tools: ["create_note"] },
+    { role: "skip" },
+    { role: "lead",  text: "Fechou, R$ 1.400 à vista tá certo. Vou escolher o horário agora e a gente já finaliza tudo. 🚀" },
+  ];
+
+  // ——— montagem do DOM do chat (tudo presente desde o início; a animação só revela) ———
+  const chatBody = document.getElementById("chat-body");
+  const chat = document.getElementById("chat");
+  const costPill = document.getElementById("cost-pill");
+  const outcome = document.getElementById("outcome");
+  const fmtCost = (v) => "custo $" + v.toFixed(4);
+
+  let lastRole = null;
+  const nodes = []; // [{els:[...], role}] na ordem de exibição
+  EVENTS.forEach((ev) => {
+    const els = [];
+    if (ev.role === "skip") {
+      const s = document.createElement("span");
+      s.className = "chat-skip";
+      s.textContent = "··· negociação continua (transcrição completa no repositório) ···";
+      chatBody.appendChild(s); els.push(s);
+    } else {
+      if (ev.role !== lastRole) {
+        const w = document.createElement("span");
+        w.className = "who" + (ev.role === "agent" ? " agent" : "");
+        w.textContent = ev.role === "agent" ? "agente de IA" : "cliente simulado";
+        chatBody.appendChild(w); els.push(w);
+      }
+      const m = document.createElement("div");
+      m.className = "msg " + ev.role;
+      m.textContent = ev.text;
+      chatBody.appendChild(m); els.push(m);
+      if (ev.tools && ev.tools.length) {
+        const t = document.createElement("div");
+        t.className = "tools";
+        ev.tools.forEach((name) => {
+          const c = document.createElement("span");
+          c.className = "chip"; c.textContent = name;
+          t.appendChild(c);
+        });
+        chatBody.appendChild(t); els.push(t);
+      }
+      lastRole = ev.role;
+    }
+    nodes.push({ els, role: ev.role });
+  });
+
+  // indicador "digitando…" (movido para o fim do corpo durante o replay)
+  const typing = document.createElement("div");
+  typing.className = "typing";
+  typing.innerHTML = "<i></i><i></i><i></i>";
+  chatBody.appendChild(typing);
+
+  // ——— motor do replay ———
+  const staticMode =
+    new URLSearchParams(location.search).has("static") ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let playToken = 0; // invalida replays anteriores
+  const sleep = (ms, token) =>
+    new Promise((res) => setTimeout(() => res(token === playToken), ms));
+
+  function showAll() {
+    chat.classList.remove("anim");
+    typing.classList.remove("show");
+    costPill.textContent = fmtCost(TOTAL_COST);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function tweenCost(from, to, ms, token) {
+    const t0 = performance.now();
+    (function frame(now) {
+      if (token !== playToken) return;
+      const k = Math.min(1, (now - t0) / ms);
+      costPill.textContent = fmtCost(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) requestAnimationFrame(frame);
+    })(t0);
+  }
+
+  async function play() {
+    const token = ++playToken;
+    chat.classList.add("anim");
+    nodes.forEach((n) => n.els.forEach((el) => el.classList.remove("in")));
+    outcome.classList.remove("in");
+    typing.classList.remove("show");
+    costPill.textContent = fmtCost(0);
+    chatBody.scrollTop = 0;
+
+    const msgCount = nodes.filter((n) => n.role !== "skip").length;
+    let shown = 0;
+    if (!(await sleep(500, token))) return;
+
+    for (const n of nodes) {
+      if (n.role === "skip") {
+        n.els.forEach((el) => el.classList.add("in"));
+        chatBody.scrollTop = chatBody.scrollHeight;
+        if (!(await sleep(900, token))) return;
+        continue;
+      }
+      // digitando…
+      typing.classList.toggle("agent-side", n.role === "agent");
+      typing.classList.add("show");
+      chatBody.appendChild(typing); // mantém no fim
+      chatBody.scrollTop = chatBody.scrollHeight;
+      const text = n.els.map((e) => e.textContent).join(" ");
+      if (!(await sleep(Math.min(1400, 420 + text.length * 4), token))) return;
+      typing.classList.remove("show");
+
+      n.els.forEach((el) => el.classList.add("in"));
+      shown += 1;
+      tweenCost(((shown - 1) / msgCount) * TOTAL_COST, (shown / msgCount) * TOTAL_COST, 500, token);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      if (!(await sleep(650, token))) return;
+    }
+
+    if (!(await sleep(400, token))) return;
+    costPill.textContent = fmtCost(TOTAL_COST);
+    outcome.classList.add("in");
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  if (staticMode || typeof IntersectionObserver === "undefined") {
+    showAll();
+  } else {
+    chat.classList.add("anim");
+    const chatObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { chatObs.unobserve(chat); play(); }
+      });
+    }, { threshold: 0.35 });
+    chatObs.observe(chat);
+  }
+
+  document.getElementById("replay-again").addEventListener("click", () => {
+    if (staticMode) { showAll(); return; }
+    play();
+    chat.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  // ——— reveal on scroll (respeita prefers-reduced-motion via CSS) ———
+  if (staticMode || typeof IntersectionObserver === "undefined") {
+    document.querySelectorAll(".reveal").forEach((el) => {
+      el.style.transition = "none";
+      el.classList.add("is-visible");
+    });
+  } else {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add("is-visible"); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+  }
+</script>
+</body>
+</html>
