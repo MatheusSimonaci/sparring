@@ -118,17 +118,19 @@
   .hero-note{font-size:.8125rem;color:var(--fg-faint);margin-top:18px}
 
   /* painel do chat — a peça do hero */
-  .stage{position:relative;perspective:1600px}
+  .stage{position:relative}
+  /* a flutuação anima SÓ transform (no wrapper) — animar margin/top reflui o
+     layout e faz a página inteira abaixo tremer */
+  .float-wrap{animation:float 8s ease-in-out infinite;will-change:transform}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
   .chat{
     position:relative;background:var(--surface-1);border:1px solid var(--line-strong);
     border-radius:var(--r-xl);overflow:hidden;
     box-shadow:var(--shadow-lg),0 0 90px rgba(201,168,126,.10);
-    transform:rotateY(-7deg) rotateX(1.5deg);
+    transform:perspective(1600px) rotateY(-7deg) rotateX(1.5deg);
     transition:transform var(--t-cine) var(--ease-out),box-shadow var(--t-cine) var(--ease-out);
-    animation:float 8s ease-in-out infinite;
   }
-  .stage:hover .chat{transform:rotateY(0) rotateX(0);box-shadow:var(--shadow-lg),0 0 120px rgba(201,168,126,.16)}
-  @keyframes float{0%,100%{margin-top:0}50%{margin-top:-10px}}
+  .stage:hover .chat{transform:perspective(1600px) rotateY(0) rotateX(0);box-shadow:var(--shadow-lg),0 0 120px rgba(201,168,126,.16)}
   .chat::before{ /* nó de conexão (motivo da marca) */
     content:"";position:absolute;top:-5px;left:38px;width:9px;height:9px;border-radius:50%;z-index:2;
     background:var(--accent-bright);box-shadow:0 0 14px rgba(231,207,168,.9);
@@ -349,7 +351,8 @@
     .btn,.step,.top-link,.replay-btn{transition:none}
     .btn-primary::after{display:none}
     .typing i,.cursor{animation:none}
-    .chat{animation:none;transform:none}
+    .float-wrap{animation:none}
+    .chat{transform:none}
     .aurora i{animation:none}
     .marquee-track{animation:none}
   }
@@ -359,7 +362,8 @@
     .hero{padding:120px 0 72px}
     .hero-grid{grid-template-columns:1fr;gap:56px}
     .hero .lead{max-width:56ch}
-    .chat{transform:none;animation:none}
+    .float-wrap{animation:none}
+    .chat{transform:none}
     .stats{grid-template-columns:1fr;gap:36px;padding:72px 0}
     .steps{grid-template-columns:1fr}
     .step{border-left:none;border-top:1px solid var(--line)}
@@ -407,6 +411,7 @@
       </div>
 
       <div class="stage">
+        <div class="float-wrap">
         <div class="chat" id="chat" aria-label="Replay de conversa real entre agente de IA e cliente simulado (trecho)">
           <div class="chat-head">
             <div class="chat-id">
@@ -419,6 +424,7 @@
           <div class="chat-end">
             <span class="outcome" id="outcome">[FECHOU] · 8 turnos · US$ 0,011</span>
           </div>
+        </div>
         </div>
         <div class="stage-caption">
           <span>conversa real · replay sem edição</span>
