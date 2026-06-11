@@ -200,7 +200,7 @@ e chamar o CLI — então um agente faz o mesmo, sem interface:
   ferramentas, flags do CLI e o loop de iteração. Funciona com qualquer agente.
 - **Skill pronta** — o repositório traz a skill `sparring` em `.agents/skills/sparring/`
   (o diretório padrão que Codex, Cursor, Gemini CLI, Copilot, OpenCode e outros leem),
-  com um symlink em `.claude/skills/sparring` para o Claude Code. Trabalhando dentro do
+  com uma cópia em `.claude/skills/sparring/` para o Claude Code. Trabalhando dentro do
   repo, o agente a encontra sozinho. Peça, por exemplo:
 
 > Use a skill **sparring**: me entreviste sobre o meu negócio, preencha o prompt do agente,
@@ -227,7 +227,7 @@ O loop de iteração que a aplicação habilita:
 sparring/
 ├── AGENTS.md                   # guia AI-friendly (schemas + CLI) p/ qualquer agente
 ├── .agents/skills/sparring/    # skill (dir padrão: Codex, Cursor, Gemini, OpenCode…)
-├── .claude/skills/sparring ->  # symlink p/ a skill acima (Claude Code)
+├── .claude/skills/sparring/    # cópia da skill acima (Claude Code)
 ├── config/
 │   ├── agent/exemplo.md        # system prompt de exemplo (troque pelo seu)
 │   ├── agents/*.json           # setups de agente (modelo único ou roteador)
