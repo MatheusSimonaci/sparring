@@ -1,38 +1,72 @@
 import type React from "react";
+import { loadFont as loadNewsreader } from "@remotion/google-fonts/Newsreader";
+import { loadFont as loadOutfit } from "@remotion/google-fonts/Outfit";
+import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsMono";
 
 // Identidade do projeto — troque o nome/URL aqui e tudo (vídeo inteiro) acompanha.
 export const TOOL_NAME = "Sparring";
-export const GITHUB_LABEL = "open source · GitHub";
+export const GITHUB_LABEL = "open source";
+export const GITHUB_URL = "github.com/MatheusSimonaci/sparring";
 export const AUTHOR_LINE = "feito por Matheus · usado de verdade na 4virtue";
 
-// Tokens do design system 4virtue (4virtue-mapa-do-negocio.html)
+// Fontes do design system (bloqueiam o render até carregar)
+const newsreader = loadNewsreader("normal", {
+  weights: ["400", "500", "600"],
+  subsets: ["latin", "latin-ext"],
+});
+const newsreaderItalic = loadNewsreader("italic", {
+  weights: ["400", "500"],
+  subsets: ["latin", "latin-ext"],
+});
+const outfit = loadOutfit("normal", {
+  weights: ["300", "400", "500", "600"],
+  subsets: ["latin", "latin-ext"],
+});
+const jetbrains = loadJetBrainsMono("normal", {
+  weights: ["400", "500", "600"],
+  subsets: ["latin", "latin-ext"],
+});
+
+export const serifFamily = newsreader.fontFamily; // títulos
+export const serifItalicFamily = newsreaderItalic.fontFamily;
+export const fontFamily = outfit.fontFamily; // corpo / UI
+export const monoFamily = jetbrains.fontFamily; // labels técnicos
+
+// Tokens do design system 4virtue (design-system/colors_and_type.css)
 export const colors = {
-  bg: "#faf9f7",
-  card: "#ffffff",
-  ink: "#16181d",
-  muted: "#6b7280",
-  line: "#e7e7e4",
-  accent: "#1f5c45",
-  accentSoft: "#e8f2ed",
-  warn: "#b45309",
-  warnSoft: "#fef3e2",
+  bg: "#060605",
+  bgDeep: "#000000",
+  bgRaised: "#100F0D",
+  surface1: "#15140F",
+  surface2: "#1C1A14",
+  surface3: "#262219",
+  line: "rgba(244,239,230,0.08)",
+  lineStrong: "rgba(244,239,230,0.16)",
+  fg: "#F4EFE6",
+  fgStrong: "#FFFFFF",
+  muted: "#A39C8F",
+  faint: "#6E685D",
+  ghost: "#443F38",
+  onLight: "#1A140C",
+  accent: "#C9A87E",
+  accentBright: "#E7CFA8",
+  accentDeep: "#8C7150",
+  accentTint: "rgba(201,168,126,0.12)",
+  accentLine: "rgba(201,168,126,0.34)",
+  critical: "#C98A7E",
+  criticalTint: "rgba(201,138,126,0.14)",
+  criticalLine: "rgba(201,138,126,0.38)",
   // chat
-  bubbleAgent: "#e8f2ed",
-  bubbleLead: "#ffffff",
+  bubbleAgent: "rgba(201,168,126,0.12)",
+  bubbleLead: "#1C1A14",
 };
 
-export const fontFamily =
-  '-apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif';
-
-export const monoFamily =
-  '"Cascadia Code", Consolas, "SF Mono", Menlo, monospace';
-
-// Label uppercase com letter-spacing (assinatura visual da marca)
+// Eyebrow mono uppercase com letter-spacing (assinatura visual da marca)
 export const labelStyle = (size: number): React.CSSProperties => ({
   fontSize: size,
-  letterSpacing: "0.18em",
+  letterSpacing: "0.22em",
   textTransform: "uppercase" as const,
   color: colors.accent,
-  fontWeight: 600,
-  fontFamily,
+  fontWeight: 500,
+  fontFamily: monoFamily,
 });

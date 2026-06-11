@@ -1,14 +1,12 @@
-﻿import React from "react";
+import React from "react";
 import {
   AbsoluteFill,
-  Easing,
   interpolate,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { colors, fontFamily, labelStyle, TOOL_NAME } from "../theme";
-
-const ease = Easing.bezier(0.16, 1, 0.3, 1);
+import { labelStyle, TOOL_NAME } from "../theme";
+import { DarkBackdrop, DrawLine, easeOut, Grain, WordReveal } from "../fx";
 
 export const Hook: React.FC = () => {
   const frame = useCurrentFrame();
@@ -16,68 +14,75 @@ export const Hook: React.FC = () => {
 
   // no vertical, escala a tipografia pra ocupar bem o quadro
   const bw = height > width ? width * 1.5 : width;
-  const titleSize = bw * 0.052;
+  const titleSize = bw * 0.055;
 
-  const line1 = interpolate(frame, [0, 0.5 * fps], [0, 1], {
+  const eyebrow = interpolate(frame, [0, 0.4 * fps], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: ease,
+    easing: easeOut,
   });
-  const line2 = interpolate(frame, [0.9 * fps, 1.5 * fps], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: ease,
-  });
+  // tracking do eyebrow abre devagar (respiro premium)
+  const tracking = 0.22 + eyebrow * 0.1;
+
+  // zoom lento do bloco inteiro (cinematográfico, nunca brusco)
+  const slowZoom = interpolate(frame, [0, durationInFrames], [1, 1.045]);
+
   const fadeOut = interpolate(
     frame,
-    [durationInFrames - 0.4 * fps, durationInFrames - 2],
+    [durationInFrames - 0.45 * fps, durationInFrames - 2],
     [1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.bg,
-        justifyContent: "center",
-        alignItems: "center",
-        opacity: fadeOut,
-        fontFamily,
-      }}
-    >
-      <div style={{ textAlign: "center", padding: "0 8%" }}>
-        <div style={{ ...labelStyle(bw * 0.012), opacity: line1 }}>
-          {TOOL_NAME}
+    <AbsoluteFill style={{ opacity: fadeOut }}>
+      <DarkBackdrop intensity={1.25} />
+      <AbsoluteFill
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          transform: `scale(${slowZoom})`,
+        }}
+      >
+        <div
+          style={{
+            textAlign: "center",
+            padding: "0 8%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              ...labelStyle(bw * 0.012),
+              letterSpacing: `${tracking}em`,
+              opacity: eyebrow,
+            }}
+          >
+            {TOOL_NAME}
+          </div>
+          <div style={{ height: bw * 0.022 }} />
+          <WordReveal
+            text="Agentes de IA erram."
+            startFrame={Math.round(0.25 * fps)}
+            size={titleSize}
+            perWord={4}
+          />
+          <div style={{ height: bw * 0.012 }} />
+          <WordReveal
+            text="A questão é: na frente de quem?"
+            startFrame={Math.round(1.15 * fps)}
+            size={titleSize * 0.82}
+            perWord={3}
+            italic
+            color="#E7CFA8"
+          />
+          <div style={{ height: bw * 0.03 }} />
+          <DrawLine startFrame={Math.round(2.1 * fps)} width={bw * 0.16} />
         </div>
-        <h1
-          style={{
-            fontSize: titleSize,
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
-            color: colors.ink,
-            margin: `${bw * 0.015}px 0 0`,
-            opacity: line1,
-            transform: `translateY(${(1 - line1) * 24}px)`,
-            lineHeight: 1.15,
-          }}
-        >
-          Agentes de IA erram.
-        </h1>
-        <h1
-          style={{
-            fontSize: titleSize,
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
-            color: colors.accent,
-            margin: `${bw * 0.008}px 0 0`,
-            opacity: line2,
-            transform: `translateY(${(1 - line2) * 24}px)`,
-            lineHeight: 1.15,
-          }}
-        >
-          A questão é: na frente de quem?
-        </h1>
-      </div>
+      </AbsoluteFill>
+      <Grain />
     </AbsoluteFill>
   );
 };

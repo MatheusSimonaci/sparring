@@ -1,7 +1,6 @@
-﻿import React from "react";
+import React from "react";
 import {
   AbsoluteFill,
-  Easing,
   interpolate,
   useCurrentFrame,
   useVideoConfig,
@@ -11,93 +10,134 @@ import {
   colors,
   fontFamily,
   GITHUB_LABEL,
+  GITHUB_URL,
   labelStyle,
+  monoFamily,
+  serifFamily,
   TOOL_NAME,
 } from "../theme";
-
-const ease = Easing.bezier(0.16, 1, 0.3, 1);
+import { DarkBackdrop, DrawLine, easeOut, Grain, WordReveal } from "../fx";
 
 export const Outro: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps, width, height } = useVideoConfig();
-  // no vertical, escala a tipografia pra ocupar bem o quadro
+  const { fps, width, height, durationInFrames } = useVideoConfig();
   const bw = height > width ? width * 1.5 : width;
 
   const appear = (delaySec: number) =>
     interpolate(frame, [delaySec * fps, (delaySec + 0.5) * fps], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: ease,
+      easing: easeOut,
     });
 
-  const a1 = appear(0);
-  const a2 = appear(1.0);
-  const a3 = appear(1.9);
-  const a4 = appear(2.6);
+  const wordmark = appear(1.5);
+  const a3 = appear(2.4);
+  const a4 = appear(3.0);
+
+  // o glow "respira" atrás do wordmark
+  const breathe = 1 + Math.sin(frame / (1.6 * fps)) * 0.06;
+  const slowZoom = interpolate(frame, [0, durationInFrames], [1, 1.035]);
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.bg,
-        justifyContent: "center",
-        alignItems: "center",
-        fontFamily,
-      }}
-    >
-      <div style={{ textAlign: "center", padding: "0 8%" }}>
-        <h1
-          style={{
-            fontSize: bw * 0.046,
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
-            color: colors.ink,
-            lineHeight: 1.2,
-            margin: 0,
-            opacity: a1,
-            transform: `translateY(${(1 - a1) * 24}px)`,
-          }}
-        >
-          Teste o seu agente{" "}
-          <span style={{ color: colors.accent }}>
-            antes do primeiro cliente real.
-          </span>
-        </h1>
-
+    <AbsoluteFill style={{ fontFamily }}>
+      <DarkBackdrop intensity={1.3} />
+      <AbsoluteFill
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          transform: `scale(${slowZoom})`,
+        }}
+      >
         <div
           style={{
-            marginTop: bw * 0.03,
-            fontSize: bw * 0.034,
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
-            color: colors.accent,
-            opacity: a2,
-            transform: `translateY(${(1 - a2) * 20}px)`,
+            textAlign: "center",
+            padding: "0 8%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
-          {TOOL_NAME}
-        </div>
+          <WordReveal
+            text="Teste o seu agente antes"
+            startFrame={0}
+            size={bw * 0.042}
+            perWord={3}
+          />
+          <WordReveal
+            text="do primeiro cliente real."
+            startFrame={Math.round(0.5 * fps)}
+            size={bw * 0.042}
+            perWord={3}
+            italic
+            color={colors.accentBright}
+          />
 
-        <div
-          style={{
-            ...labelStyle(bw * 0.013),
-            marginTop: bw * 0.012,
-            opacity: a3,
-          }}
-        >
-          {GITHUB_LABEL}
-        </div>
+          <div style={{ position: "relative", marginTop: bw * 0.035 }}>
+            {/* glow atrás do wordmark */}
+            <div
+              style={{
+                position: "absolute",
+                inset: `-${bw * 0.05}px -${bw * 0.12}px`,
+                background:
+                  "radial-gradient(50% 50% at 50% 50%, rgba(201,168,126,0.22) 0%, rgba(201,168,126,0) 70%)",
+                opacity: wordmark,
+                transform: `scale(${breathe})`,
+              }}
+            />
+            <div
+              style={{
+                position: "relative",
+                fontFamily: serifFamily,
+                fontWeight: 500,
+                fontSize: bw * 0.052,
+                letterSpacing: "-0.02em",
+                color: colors.fg,
+                opacity: wordmark,
+                transform: `translateY(${(1 - wordmark) * 22}px)`,
+              }}
+            >
+              {TOOL_NAME}
+            </div>
+          </div>
 
-        <div
-          style={{
-            marginTop: bw * 0.025,
-            fontSize: bw * 0.013,
-            color: colors.muted,
-            opacity: a4,
-          }}
-        >
-          {AUTHOR_LINE}
+          <div style={{ marginTop: bw * 0.02, opacity: a3 }}>
+            <DrawLine startFrame={Math.round(2.4 * fps)} width={bw * 0.12} />
+          </div>
+
+          <div
+            style={{
+              ...labelStyle(bw * 0.012),
+              marginTop: bw * 0.02,
+              opacity: a3,
+            }}
+          >
+            {GITHUB_LABEL}
+          </div>
+          <div
+            style={{
+              fontFamily: monoFamily,
+              fontSize: bw * 0.014,
+              color: colors.fg,
+              marginTop: bw * 0.008,
+              opacity: a3,
+            }}
+          >
+            {GITHUB_URL}
+          </div>
+
+          <div
+            style={{
+              marginTop: bw * 0.022,
+              fontSize: bw * 0.012,
+              color: colors.faint,
+              opacity: a4,
+            }}
+          >
+            {AUTHOR_LINE}
+          </div>
         </div>
-      </div>
+      </AbsoluteFill>
+      <Grain />
     </AbsoluteFill>
   );
 };

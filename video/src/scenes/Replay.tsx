@@ -1,7 +1,6 @@
 import React from "react";
 import {
   AbsoluteFill,
-  Easing,
   interpolate,
   spring,
   useCurrentFrame,
@@ -12,8 +11,10 @@ import {
   fontFamily,
   labelStyle,
   monoFamily,
+  serifFamily,
   TOOL_NAME,
 } from "../theme";
+import { DarkBackdrop, easeOut, Grain } from "../fx";
 import {
   events,
   leadName,
@@ -22,8 +23,6 @@ import {
   totalCostUsd,
   type ChatEvent,
 } from "../data/demo";
-
-const ease = Easing.bezier(0.16, 1, 0.3, 1);
 
 // Distribui os eventos no tempo disponível, com peso pelo tamanho do texto
 // (mensagem longa fica mais tempo na tela antes da próxima entrar).
@@ -53,29 +52,88 @@ const ToolChip: React.FC<{ name: string; enter: number; u: number }> = ({
       display: "inline-flex",
       alignItems: "center",
       gap: 8 * u,
-      backgroundColor: colors.warnSoft,
-      color: colors.warn,
-      border: `1px solid ${colors.warn}33`,
+      backgroundColor: "rgba(201,168,126,0.06)",
+      color: colors.accent,
+      border: `1px solid ${colors.accentLine}`,
       borderRadius: 999,
-      padding: `${7 * u}px ${15 * u}px`,
-      fontSize: 20 * u,
+      padding: `${6 * u}px ${14 * u}px`,
+      fontSize: 18 * u,
       fontFamily: monoFamily,
-      fontWeight: 600,
+      fontWeight: 500,
       opacity: enter,
       transform: `scale(${0.85 + enter * 0.15})`,
     }}
   >
     <span
       style={{
-        width: 9 * u,
-        height: 9 * u,
+        width: 8 * u,
+        height: 8 * u,
         borderRadius: "50%",
-        backgroundColor: colors.warn,
+        backgroundColor: colors.accent,
+        boxShadow: "0 0 10px rgba(201,168,126,0.9)",
       }}
     />
     {name}
   </span>
 );
+
+// "digitando…" — aparece LOGO ABAIXO da última mensagem, no lado de quem
+// vai responder, durante a pausa antes da próxima mensagem entrar.
+const TypingDots: React.FC<{ agent: boolean; u: number; enter: number }> = ({
+  agent,
+  u,
+  enter,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: agent ? "flex-end" : "flex-start",
+        marginTop: 14 * u,
+        opacity: enter,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 7 * u,
+          alignItems: "center",
+          backgroundColor: agent ? colors.bubbleAgent : colors.bubbleLead,
+          border: `1px solid ${agent ? colors.accentLine : colors.line}`,
+          borderRadius: 18 * u,
+          borderBottomRightRadius: agent ? 5 * u : 18 * u,
+          borderBottomLeftRadius: agent ? 18 * u : 5 * u,
+          padding: `${13 * u}px ${17 * u}px`,
+        }}
+      >
+        {[0, 1, 2].map((i) => {
+          const pulse =
+            0.25 +
+            0.75 *
+              Math.max(
+                0,
+                Math.sin(((frame / fps) * 2.6 - i * 0.28) * Math.PI),
+              );
+          return (
+            <span
+              key={i}
+              style={{
+                width: 8 * u,
+                height: 8 * u,
+                borderRadius: "50%",
+                backgroundColor: agent ? colors.accent : colors.faint,
+                opacity: pulse,
+                transform: `translateY(${-(pulse - 0.25) * 4 * u}px)`,
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const Bubble: React.FC<{
   event: ChatEvent;
@@ -99,7 +157,7 @@ const Bubble: React.FC<{
     frame,
     [startFrame + chipDelay, startFrame + chipDelay + 0.3 * fps],
     [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: easeOut },
   );
 
   return (
@@ -117,16 +175,15 @@ const Bubble: React.FC<{
         style={{
           maxWidth: "78%",
           backgroundColor: isAgent ? colors.bubbleAgent : colors.bubbleLead,
-          border: `1px solid ${isAgent ? colors.accent + "22" : colors.line}`,
-          borderRadius: 23 * u,
-          borderBottomRightRadius: isAgent ? 6 * u : 23 * u,
-          borderBottomLeftRadius: isAgent ? 23 * u : 6 * u,
+          border: `1px solid ${isAgent ? colors.accentLine : colors.line}`,
+          borderRadius: 21 * u,
+          borderBottomRightRadius: isAgent ? 6 * u : 21 * u,
+          borderBottomLeftRadius: isAgent ? 21 * u : 6 * u,
           padding: `${15 * u}px ${21 * u}px`,
           fontSize: 26 * u,
           lineHeight: 1.45,
-          color: colors.ink,
+          color: isAgent ? colors.fg : colors.muted,
           fontFamily,
-          boxShadow: "0 1px 2px rgba(22,24,29,0.05)",
           whiteSpace: "pre-wrap",
         }}
       >
@@ -173,10 +230,24 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
           extrapolateRight: "clamp",
         });
 
+  // próxima mensagem a entrar → mostra "digitando…" na janela anterior a ela
+  const nextIdx = starts.findIndex((s) => frame < s);
+  const typingWindow = Math.round(0.55 * fps);
+  const showTyping =
+    nextIdx >= 0 && frame >= starts[nextIdx] - typingWindow && frame >= 6;
+  const typingEnter = showTyping
+    ? interpolate(
+        frame,
+        [starts[nextIdx] - typingWindow, starts[nextIdx] - typingWindow + 5],
+        [0, 1],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+      )
+    : 0;
+
   const panelEnter = interpolate(frame, [0, 0.5 * fps], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: ease,
+    easing: easeOut,
   });
 
   const stampEnter = spring({
@@ -187,14 +258,9 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
   });
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: colors.bg,
-        justifyContent: "center",
-        alignItems: "center",
-        fontFamily,
-      }}
-    >
+    <AbsoluteFill style={{ fontFamily }}>
+      <DarkBackdrop />
+
       {/* legenda: lateral no horizontal, topo no vertical */}
       {!isVertical ? (
         <div
@@ -207,31 +273,31 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
             opacity: panelEnter,
           }}
         >
-          <div style={labelStyle(width * 0.011)}>cliente simulado</div>
+          <div style={labelStyle(width * 0.0105)}>o treinamento, ao vivo</div>
           <h2
             style={{
-              fontSize: width * 0.028,
-              fontWeight: 700,
+              fontSize: width * 0.027,
+              fontWeight: 500,
+              fontFamily: serifFamily,
               letterSpacing: "-0.02em",
-              color: colors.ink,
-              lineHeight: 1.25,
-              margin: `${width * 0.01}px 0 0`,
+              color: colors.fg,
+              lineHeight: 1.18,
+              margin: `${width * 0.012}px 0 0`,
             }}
           >
-            O {TOOL_NAME} cria clientes que negociam de verdade com o seu
-            agente.
+            O {TOOL_NAME} cria clientes que negociam de verdade.
           </h2>
           <p
             style={{
-              fontSize: width * 0.0135,
+              fontSize: width * 0.0125,
               color: colors.muted,
               lineHeight: 1.55,
               marginTop: width * 0.012,
+              maxWidth: "30ch",
             }}
           >
-            Esta conversa é real: aconteceu entre o agente da 4virtue e um
-            cliente simulado, antes de qualquer lead de verdade. As etiquetas
-            laranja são as ações no CRM.
+            Conversa real, sem edição. As etiquetas douradas são as ações do
+            agente no CRM simulado.
           </p>
         </div>
       ) : (
@@ -258,10 +324,11 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
           top: isVertical ? height * 0.095 : (height - panelHeight) / 2,
           width: panelWidth,
           height: panelHeight,
-          backgroundColor: colors.card,
-          border: `1px solid ${colors.line}`,
+          backgroundColor: colors.surface1,
+          border: `1px solid ${colors.lineStrong}`,
           borderRadius: 27 * u,
-          boxShadow: "0 10px 40px rgba(22,24,29,0.08)",
+          boxShadow:
+            "0 30px 80px rgba(0,0,0,0.65), 0 0 90px rgba(201,168,126,0.10)",
           overflow: "hidden",
           opacity: panelEnter,
           transform: `translateY(${(1 - panelEnter) * 30}px)`,
@@ -269,6 +336,20 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
           flexDirection: "column",
         }}
       >
+        {/* nó de conexão da marca */}
+        <div
+          style={{
+            position: "absolute",
+            top: -5 * u,
+            left: 38 * u,
+            width: 10 * u,
+            height: 10 * u,
+            borderRadius: "50%",
+            backgroundColor: colors.accentBright,
+            boxShadow: "0 0 16px rgba(231,207,168,0.9)",
+            zIndex: 2,
+          }}
+        />
         {/* header do chat */}
         <div
           style={{
@@ -277,7 +358,7 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
             justifyContent: "space-between",
             padding: `${15 * u}px ${23 * u}px`,
             borderBottom: `1px solid ${colors.line}`,
-            backgroundColor: colors.bg,
+            backgroundColor: colors.surface2,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 13 * u }}>
@@ -286,13 +367,15 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
                 width: 38 * u,
                 height: 38 * u,
                 borderRadius: "50%",
-                backgroundColor: colors.accentSoft,
+                backgroundColor: colors.accentTint,
+                border: `1px solid ${colors.accentLine}`,
                 color: colors.accent,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontWeight: 700,
-                fontSize: 19 * u,
+                fontWeight: 500,
+                fontSize: 20 * u,
+                fontFamily: serifFamily,
               }}
             >
               {leadName.charAt(0)}
@@ -301,13 +384,13 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
               <div
                 style={{
                   fontSize: 24 * u,
-                  fontWeight: 700,
-                  color: colors.ink,
+                  fontWeight: 500,
+                  color: colors.fg,
                 }}
               >
                 {leadName}
               </div>
-              <div style={{ fontSize: 18 * u, color: colors.muted }}>
+              <div style={{ fontSize: 18 * u, color: colors.faint }}>
                 {leadRole}
               </div>
             </div>
@@ -315,12 +398,14 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
           <div
             style={{
               fontFamily: monoFamily,
-              fontSize: 21 * u,
-              fontWeight: 700,
+              fontSize: 20 * u,
+              fontWeight: 500,
               color: colors.accent,
-              backgroundColor: colors.accentSoft,
+              backgroundColor: colors.accentTint,
+              border: `1px solid ${colors.accentLine}`,
               borderRadius: 999,
               padding: `${6 * u}px ${17 * u}px`,
+              fontVariantNumeric: "tabular-nums",
             }}
           >
             custo: ${costNow.toFixed(4)}
@@ -341,6 +426,13 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
           {events.map((e, i) => (
             <Bubble key={i} event={e} startFrame={starts[i]} u={u} />
           ))}
+          {showTyping && nextIdx >= 0 ? (
+            <TypingDots
+              agent={events[nextIdx].role === "agent"}
+              u={u}
+              enter={typingEnter}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -354,18 +446,21 @@ export const Replay: React.FC<{ durationInFrames: number }> = ({
             transform: `translateX(-50%) scale(${0.9 + stampEnter * 0.1})`,
             opacity: stampEnter,
             backgroundColor: colors.accent,
-            color: "#fff",
+            color: colors.onLight,
             borderRadius: 999,
             padding: `${15 * u}px ${34 * u}px`,
-            fontSize: 27 * u,
-            fontWeight: 700,
-            boxShadow: "0 10px 30px rgba(31,92,69,0.35)",
+            fontSize: 26 * u,
+            fontWeight: 600,
+            fontFamily: monoFamily,
+            boxShadow: "0 0 60px rgba(201,168,126,0.35)",
             whiteSpace: "nowrap",
           }}
         >
           {outcomeLabel} · custo real: ${totalCostUsd.toFixed(4)}
         </div>
       ) : null}
+
+      <Grain />
     </AbsoluteFill>
   );
 };

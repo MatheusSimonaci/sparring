@@ -1,54 +1,44 @@
-# Remotion video
+# Vídeo demo (Remotion)
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+Fonte do vídeo demo do Sparring — duas composições: `DemoHorizontal` (1920×1080,
+para a página) e `DemoVertical` (1080×1920, para social). Visual segue o design
+system 4virtue (dark, champagne, Newsreader/Outfit/JetBrains Mono) em `src/theme.ts`.
 
-Welcome to your Remotion project!
-
-## Commands
-
-**Install Dependencies**
+## Comandos
 
 ```console
-npm i
+npm i                  # instalar dependências
+npm run dev            # preview no Remotion Studio
+npx remotion render DemoHorizontal out/demo.mp4
+npx remotion render DemoVertical out/demo-vertical.mp4
 ```
 
-**Start Preview**
+## Narração e música
+
+A narração (PT-BR) e a música de fundo são geradas por script — os arquivos
+ficam em `public/audio/` e os timings das cenas se ajustam à narração:
 
 ```console
-npm run dev
+# requer ELEVENLABS_API_KEY (env ou video/.env, fora do git)
+node generate-audio.mjs            # narração + música (ElevenLabs)
+node generate-audio.mjs --force    # regrava a narração mesmo se já existir
 ```
 
-**Render video**
+Se a sua chave não tiver a permissão `sound_generation` (plano free), gere a
+trilha ambiente local (pad em loop perfeito, Node puro) antes — o script a usa
+como fallback:
 
 ```console
-npx remotion render
+node generate-pad.mjs
+node generate-audio.mjs
 ```
 
-**Upgrade Remotion**
+O roteiro da narração e a voz (`ELEVENLABS_VOICE_ID`) estão no topo de
+`generate-audio.mjs`. Os arquivos `src/timings.ts` e `src/audio-manifest.ts`
+são gerados — não edite à mão.
 
-```console
-npx remotion upgrade
-```
+## Dados
 
-## Docs
-
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
-
-## Help
-
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
-
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
-
-## License
-
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+O replay lê `src/data/run.json` — cópia byte a byte de uma conversa real gerada
+pela ferramenta (nada é inventado). A curadoria de quais mensagens aparecem está
+em `src/data/demo.ts`.
