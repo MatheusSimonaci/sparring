@@ -1,14 +1,16 @@
-// Roda UM turno do agente sob teste (o "Matheus"/bot do n8n).
+// Roda UM turno do agente sob teste.
 // Faz o loop de tool calling: ferramenta primeiro, resposta depois.
+// Quem o agente E (nome, papel, oferta) vem do system prompt do usuario —
+// nada de identidade hardcoded aqui.
 import { chatCompletion } from '../llm/openrouter.js';
+import { config } from '../config.js';
 import {
   toolSchemasForApi,
   executeTool,
   displayName,
   stageName,
+  toolEffect,
 } from '../tools/tools.js';
-
-const MAX_TOOL_ITERS = 8;
 
 function renderFicha(ficha) {
   if (!ficha) return '(sem ficha de pesquisa fornecida)';
@@ -55,14 +57,13 @@ function buildRuntimeContext(ficha, crm, isOpening) {
     renderCrm(crm),
     '',
     'Como agir neste turno:',
-    '- Voce e o Matheus, respondendo no WhatsApp. Use as ferramentas necessarias ANTES de escrever (ferramenta primeiro, resposta depois).',
-    '- Use a ferramenta think para raciocinar antes de agir.',
+    '- Voce esta respondendo o lead pelo chat (quem voce e esta no seu prompt principal). Use as ferramentas necessarias ANTES de escrever (ferramenta primeiro, resposta depois).',
+    '- Se tiver uma ferramenta de raciocinio interno disponivel, use-a para pensar antes de agir.',
     '- O CRM anda a frente da conversa: registre notas, mova estagio, crie pessoa/atividade quando for o caso.',
-    '- Sua RESPOSTA FINAL em texto e exatamente a mensagem que vai pro WhatsApp do lead. Sem bastidores, sem mencionar ferramentas/CRM/estagios/IDs.',
-    '- Uma ideia por mensagem. Frases curtas. Nunca use o caractere de travessao.',
+    '- Sua RESPOSTA FINAL em texto e exatamente a mensagem que vai pro chat do lead. Sem bastidores, sem mencionar ferramentas/CRM/estagios/IDs.',
     isOpening
-      ? '- Esta e a PRIMEIRA mensagem (Etapa A). Faca a abertura: elogio especifico e verdadeiro (so se tiver dado real) + desejo de faturamento.'
-      : '- Responda a ultima mensagem do lead, conduzindo a venda pro proximo passo.',
+      ? '- Esta e a PRIMEIRA mensagem da conversa. Faca a abertura conforme o seu prompt principal, usando so dados reais da ficha.'
+      : '- Responda a ultima mensagem do lead, conduzindo a conversa pro proximo passo do seu fluxo.',
   ].join('\n');
 }
 
@@ -93,6 +94,7 @@ export async function runAgentTurn({
   isOpening = false,
   signal,
   maxTokens,
+  maxToolIters = config.agentMaxToolIters, // chamadas de ferramenta por turno (AGENT_MAX_TOOL_ITERS)
   chat = chatCompletion, // injetavel pra teste
 }) {
   const baseMessages = [
@@ -104,7 +106,7 @@ export async function runAgentTurn({
     baseMessages.push({
       role: 'user',
       content:
-        '[SISTEMA] Inicie a abordagem com este lead agora, seguindo a Etapa A do fluxo comercial.',
+        '[SISTEMA] Inicie a abordagem com este lead agora, seguindo a abertura definida no seu prompt.',
     });
   }
 
@@ -126,7 +128,7 @@ export async function runAgentTurn({
   // pra nunca devolver um turno vazio.
   let lastContent = '';
 
-  for (let iter = 0; iter < MAX_TOOL_ITERS; iter++) {
+  for (let iter = 0; iter < maxToolIters; iter++) {
     const resp = await chat({
       model,
       messages,
@@ -167,7 +169,7 @@ export async function runAgentTurn({
           at: nowIso,
         };
         toolCallsLog.push(entry);
-        if (name === 'think' && args.input) thinkingParts.push(args.input);
+        if (toolEffect(name) === 'think' && args.input) thinkingParts.push(args.input);
         messages.push({
           role: 'tool',
           tool_call_id: tc.id,
@@ -206,7 +208,7 @@ export async function runAgentTurn({
         {
           role: 'user',
           content:
-            '[SISTEMA] Agora escreva, em texto puro, a proxima mensagem do Matheus para o lead no WhatsApp. Nao use ferramentas. Responda somente com a mensagem.',
+            '[SISTEMA] Agora escreva, em texto puro, a sua proxima mensagem para o lead no chat. Nao use ferramentas. Responda somente com a mensagem.',
         },
       ],
       temperature,

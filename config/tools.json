@@ -1,0 +1,168 @@
+{
+  "stages": [
+    {
+      "id": 6,
+      "name": "Inbox"
+    },
+    {
+      "id": 7,
+      "name": "Identificacao de Responsavel"
+    },
+    {
+      "id": 8,
+      "name": "Qualificacao"
+    },
+    {
+      "id": 9,
+      "name": "Apresentacao"
+    },
+    {
+      "id": 10,
+      "name": "Acompanhamento"
+    },
+    {
+      "id": 20,
+      "name": "Fechamento"
+    }
+  ],
+  "tools": [
+    {
+      "name": "think",
+      "displayName": "Think",
+      "effect": "think",
+      "enabled": true,
+      "description": "Ferramenta de raciocinio interno. Use para pensar antes de agir e antes de responder. O conteudo nunca e mostrado ao lead.",
+      "params": [
+        {
+          "name": "input",
+          "type": "string",
+          "required": true,
+          "description": "Seu raciocinio interno: o que o lead disse, em que etapa esta, o que voce vai fazer e por que. Nunca aparece pro lead."
+        }
+      ]
+    },
+    {
+      "name": "create_person",
+      "displayName": "Create a person",
+      "effect": "create_person",
+      "enabled": true,
+      "description": "Cria uma pessoa/contato no Pipedrive. Use ao identificar um novo contato a ser abordado (ex.: o decisor indicado). Retorna o person_id.",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Nome da pessoa/contato a criar."
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "Telefone, se conhecido. Pode ficar vazio."
+        }
+      ]
+    },
+    {
+      "name": "update_person_id",
+      "displayName": "Update Person_ID",
+      "effect": "link_person",
+      "enabled": true,
+      "description": "Atualiza o deal para usar o contato do tomador de decisao. Passe exatamente o person_id retornado por create_person.",
+      "params": [
+        {
+          "name": "person_id",
+          "type": "number",
+          "required": true,
+          "description": "O person_id retornado por create_person."
+        }
+      ]
+    },
+    {
+      "name": "create_activity",
+      "displayName": "Create an activity",
+      "effect": "create_activity",
+      "enabled": true,
+      "description": "Cria uma atividade (tarefa) no deal para um humano executar (abordar novo contato, follow-up agendado, completar atendimento). Sempre com contexto.",
+      "params": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "Assunto da atividade. Ex.: Abordagem, Follow-up."
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": false,
+          "description": "Tipo da atividade (canal). Ex.: WhatsApp, call, email."
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "required": true,
+          "description": "Direcionamento/contexto pra equipe humana: quem abordar, gancho, elogio ja usado, proximo passo."
+        }
+      ]
+    },
+    {
+      "name": "create_note",
+      "displayName": "Create a note",
+      "effect": "create_note",
+      "enabled": true,
+      "description": "Cria uma nota no deal do Pipedrive. Alimente continuamente: objecoes, dores, preferencias, sinais de qualificacao, fatos do negocio.",
+      "params": [
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "Nota curta e factual pra equipe: objecao, dor, preferencia, sinal de qualificacao, fato do negocio."
+        }
+      ]
+    },
+    {
+      "name": "update_deal_stage",
+      "displayName": "Update Deal_Stage",
+      "effect": "update_stage",
+      "enabled": true,
+      "description": "Move o deal de estagio no funil. Use sempre que o lead cruzar um limiar. Nao pule etapas.",
+      "params": [
+        {
+          "name": "stage_id",
+          "type": "number",
+          "required": true,
+          "description": "ID do estagio do funil."
+        }
+      ]
+    },
+    {
+      "name": "contact_human",
+      "displayName": "contact_human",
+      "effect": "notify_human",
+      "enabled": true,
+      "description": "Avisa a equipe humana (via Telegram) quando precisar de intervencao. Use junto com delegar_para_human em escaladas (preco, juridico, reclamacao seria).",
+      "params": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Resumo pra equipe (Telegram): nome do lead, estagio do funil, o que ele pediu e o contexto relevante."
+        }
+      ]
+    },
+    {
+      "name": "delegar_para_human",
+      "displayName": "delegar_para_human",
+      "effect": "handoff",
+      "enabled": true,
+      "description": "Transfere o atendimento pra um humano (desativa a IA nesse contato no Chatwoot). Use em situacoes fora do seu preparo: negociacao de preco/condicoes, juridico, reclamacao seria.",
+      "params": [
+        {
+          "name": "motivo",
+          "type": "string",
+          "required": false,
+          "description": "Motivo curto da delegacao (registro interno)."
+        }
+      ]
+    }
+  ]
+}

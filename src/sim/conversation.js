@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { runAgentTurn } from '../agent/salesAgent.js';
 import { runIcpTurn } from '../icp/icpClient.js';
 import { routeTurn } from '../agent/router.js';
-import { createCrmState, stageName } from '../tools/tools.js';
+import { createCrmState, stageName, firstStageId } from '../tools/tools.js';
 import { config } from '../config.js';
 
 function hashPrompt(text) {
@@ -68,7 +68,7 @@ export async function runConversation(opts) {
 
   const id = crypto.randomUUID();
   const createdAt = new Date().toISOString();
-  const crm = createCrmState({ stageId: icp.startStageId || 6 });
+  const crm = createCrmState({ stageId: icp.startStageId || firstStageId() });
 
   const messages = [];
   const allToolCalls = [];
@@ -352,7 +352,7 @@ function buildTranscript(o) {
       id: o.icp.id,
       name: o.icp.name,
       personaSummary: summarize(o.icp.persona),
-      startStageId: o.icp.startStageId || 6,
+      startStageId: o.icp.startStageId || firstStageId(),
     },
     agent: agentInfo,
     icpModel: o.icpModel,

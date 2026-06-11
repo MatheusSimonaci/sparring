@@ -330,6 +330,11 @@
   @keyframes blink{50%{opacity:0}}
   .run-note{font-size:.875rem;color:var(--fg-muted);margin-top:18px;max-width:40ch}
 
+  /* ========= humanos & agentes ========= */
+  code{font-family:var(--font-mono);font-size:.85em;color:var(--accent)}
+  .duo-terminal{margin-top:20px}
+  .duo-terminal .term-body div{white-space:pre-wrap}
+
   /* ========= footer ========= */
   footer{border-top:1px solid var(--line);padding:44px 0 72px}
   .foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
@@ -449,13 +454,15 @@
       <span class="mq"><b>objeção de preço</b></span>
       <span class="mq">create_activity</span>
       <span class="mq">handoff pra humano</span>
+      <span class="mq">AGENTS.md</span>
+      <span class="mq"><b>skill pra agentes</b></span>
     </div>
   </div>
 
   <!-- STATS -->
   <div class="wrap stats">
     <div class="stat reveal"><b><small>US$</small> <span class="count" data-target="0.011" data-decimals="3">0,000</span></b><span>custo real de uma conversa de treino completa</span></div>
-    <div class="stat reveal" data-delay="1"><b><span class="count" data-target="8" data-decimals="0">0</span></b><span>turnos do "oi" ao <strong style="color:var(--accent)">[FECHOU]</strong>, com negociação</span></div>
+    <div class="stat reveal" data-delay="1"><b><span class="count" data-target="8" data-decimals="0">0</span></b><span>turnos do "oi" ao <strong style="color:var(--accent)">[FECHOU]</strong> nesta conversa — turnos, ferramentas e funil são configuráveis</span></div>
     <div class="stat reveal" data-delay="2"><b><span class="count" data-target="14" data-decimals="0">0</span></b><span>ações registradas no CRM simulado, sem tocar no real</span></div>
   </div>
 
@@ -550,6 +557,42 @@
           <div><span class="p">$</span> cd sparring</div>
           <div><span class="p">$</span> copy .env.example .env   <span class="c"># chave do OpenRouter</span></div>
           <div><span class="p">$</span> npm start<span class="cursor" aria-hidden="true"></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HUMANOS & AGENTES -->
+  <section id="agentes">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow reveal"><span class="idx">006 /</span> humanos &amp; agentes</p>
+        <h2 class="sec-title reveal">Interface para humanos. <em>Skill para agentes.</em></h2>
+      </div>
+      <div class="fit">
+        <div class="fit-card yes reveal" data-delay="1">
+          <h3>Você, na interface</h3>
+          <ul>
+            <li>acompanha cada simulação ao vivo — mensagens, tool calls e custo, em tempo real;</li>
+            <li>edita clientes simulados, ferramentas e funil em formulários organizados, sem JSON;</li>
+            <li>revisa o histórico de cada conversa antes de pôr o agente no ar.</li>
+          </ul>
+        </div>
+        <div class="fit-card yes reveal" data-delay="2">
+          <h3>Seu agente, na CLI</h3>
+          <ul>
+            <li>o repositório traz <code>AGENTS.md</code> e uma skill pronta para Claude Code;</li>
+            <li>os mesmos dados que você preencheria na mão — prompt, clientes, ferramentas — ele preenche por você;</li>
+            <li>e ainda roda o treino, lê as transcrições e propõe a próxima versão do prompt.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="terminal duo-terminal reveal" role="region" aria-label="Exemplo de pedido ao seu agente de CLI">
+        <div class="term-head" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="term-body">
+          <div><span class="p">você &gt;</span> use a skill sparring: me entreviste sobre o meu negócio,</div>
+          <div>preencha o agente, os clientes simulados e as ferramentas,</div>
+          <div>rode o treino e me mostre onde ele erra<span class="cursor" aria-hidden="true"></span></div>
         </div>
       </div>
     </div>

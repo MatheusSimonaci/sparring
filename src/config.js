@@ -46,6 +46,9 @@ export const config = {
   // baixo evita o erro 402 (modelos como opus reservam 65536 por padrao) e corta custo.
   agentMaxTokens: Number(process.env.AGENT_MAX_TOKENS || 4096),
   icpMaxTokens: Number(process.env.ICP_MAX_TOKENS || 2048),
+  // Maximo de chamadas de ferramenta encadeadas num MESMO turno do agente.
+  // Nao confundir com MAX_TURNS (turnos da conversa).
+  agentMaxToolIters: Number(process.env.AGENT_MAX_TOOL_ITERS || 8),
   // Teto de custo (US$) por conversa. Ao ultrapassar, a conversa encerra
   // (endReason 'budget_exceeded'). 0 = sem teto.
   maxCostPerConversation: Number(process.env.MAX_COST_PER_CONVERSATION || 0.5),
@@ -57,6 +60,7 @@ export const paths = {
   agentPrompts: path.join(ROOT, 'config', 'agent'),
   icps: path.join(ROOT, 'config', 'icps'),
   agents: path.join(ROOT, 'config', 'agents'),
+  toolsConfig: path.join(ROOT, 'config', 'tools.json'),
   runs: path.join(ROOT, 'output', 'runs'),
   public: path.join(ROOT, 'public'),
 };

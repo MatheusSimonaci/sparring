@@ -1,200 +1,385 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>4virtue - Treino do Chatbot</title>
+    <title>Sparring — treino do agente</title>
+    <meta name="description" content="Interface do Sparring: rode clientes simulados contra o seu agente de IA e veja cada conversa, tool call e centavo em tempo real." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="brand">
-        <strong>4virtue</strong> <span class="muted">treino do agente de prospeccao</span>
-      </div>
-      <div id="health" class="health">verificando...</div>
-    </header>
+    <div class="app">
+      <!-- ===================== SIDEBAR ===================== -->
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-name">Sparring</span>
+          <span class="brand-sub">treino do agente · 4virtue</span>
+        </div>
 
-    <nav class="tabs">
-      <button class="tab active" data-tab="run">Rodar</button>
-      <button class="tab" data-tab="prompt">Prompt do agente</button>
-      <button class="tab" data-tab="agents">Agentes / Roteamento</button>
-      <button class="tab" data-tab="icps">ICPs</button>
-      <button class="tab" data-tab="history">Historico</button>
-    </nav>
+        <nav class="nav" aria-label="Seções">
+          <button class="nav-item active" data-tab="run"><span class="idx">001</span><span>Rodar</span></button>
+          <button class="nav-item" data-tab="prompt"><span class="idx">002</span><span>Prompt do agente</span></button>
+          <button class="nav-item" data-tab="agents"><span class="idx">003</span><span>Agentes &amp; roteamento</span></button>
+          <button class="nav-item" data-tab="icps"><span class="idx">004</span><span>Clientes simulados</span></button>
+          <button class="nav-item" data-tab="tools"><span class="idx">005</span><span>Ferramentas &amp; funil</span></button>
+          <button class="nav-item" data-tab="history"><span class="idx">006</span><span>Histórico</span></button>
+        </nav>
 
-    <main>
-      <!-- ===================== RODAR ===================== -->
-      <section id="tab-run" class="tabpane active">
-        <div class="run-layout">
-          <aside class="run-config">
-            <h2>Configurar simulacao</h2>
-
-            <label>Agente (setup)</label>
-            <select id="run-agent-setup"></select>
-            <p id="run-setup-info" class="hint"></p>
-
-            <label>Prompt do agente (playbook)</label>
-            <select id="run-prompt"></select>
-
-            <label>ICPs (clientes simulados)</label>
-            <div id="run-icps" class="checklist"></div>
-
-            <div class="row" id="run-single-models">
-              <div>
-                <label>Modelo do agente (modo unico)</label>
-                <input id="run-agent-model" type="text" placeholder="(padrao do .env)" />
-              </div>
-              <div>
-                <label>Modelo do ICP</label>
-                <input id="run-icp-model" type="text" placeholder="(padrao do .env)" />
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label>Max. turnos</label>
-                <input id="run-maxturns" type="number" min="2" max="40" />
-              </div>
-              <div>
-                <label>Repeticoes por ICP</label>
-                <input id="run-repeat" type="number" min="1" max="10" value="1" />
-              </div>
-              <div>
-                <label>Teto US$/conversa</label>
-                <input id="run-budget" type="number" min="0" step="0.05" />
-              </div>
-            </div>
-
-            <button id="run-btn" class="primary">Rodar simulacao</button>
-            <div class="run-controls">
-              <button id="cancel-btn" class="danger" disabled>Cancelar</button>
-              <button id="clear-btn">Limpar</button>
-            </div>
-            <p id="run-status" class="muted"></p>
-          </aside>
-
-          <div class="run-output" id="run-output">
-            <p class="muted empty">Selecione um prompt e ICPs e clique em Rodar. As conversas aparecem aqui em tempo real.</p>
+        <div class="side-foot">
+          <div id="health" class="health" role="status">verificando…</div>
+          <div class="agent-hint">
+            <p class="eyebrow">para agentes de IA</p>
+            <p>Tudo que você preenche aqui, um agente na CLI preenche por você. Peça pra ele ler o <code>AGENTS.md</code> do repositório — ou usar a skill <code>sparring</code> — e configurar, rodar e analisar o treino.</p>
           </div>
         </div>
-      </section>
+      </aside>
 
-      <!-- ===================== PROMPT ===================== -->
-      <section id="tab-prompt" class="tabpane">
-        <div class="editor-head">
-          <div>
-            <label>Prompt</label>
-            <select id="prompt-select"></select>
+      <!-- ===================== MAIN ===================== -->
+      <main>
+        <!-- ===================== RODAR ===================== -->
+        <section id="tab-run" class="tabpane active" aria-labelledby="run-title">
+          <header class="page-head">
+            <p class="eyebrow"><span class="idx">001 /</span> rodar</p>
+            <h1 id="run-title">Coloque o agente no ringue.</h1>
+            <p class="lead">Escolha o prompt, marque os clientes simulados e acompanhe cada conversa, tool call e centavo em tempo real.</p>
+          </header>
+
+          <div class="run-layout">
+            <div class="run-config">
+              <div class="box">
+                <p class="box-title">agente</p>
+                <label for="run-agent-setup">Setup (modelos)</label>
+                <select id="run-agent-setup"></select>
+                <p id="run-setup-info" class="hint"></p>
+                <div class="row" id="run-single-models">
+                  <div>
+                    <label for="run-agent-model">Modelo do agente</label>
+                    <input id="run-agent-model" type="text" placeholder="(padrão do .env)" />
+                  </div>
+                </div>
+                <label for="run-prompt">Prompt (playbook)</label>
+                <select id="run-prompt"></select>
+              </div>
+
+              <div class="box">
+                <p class="box-title">clientes simulados</p>
+                <div id="run-icps" class="checklist" role="group" aria-label="Clientes simulados"></div>
+                <label for="run-icp-model">Modelo do cliente simulado</label>
+                <input id="run-icp-model" type="text" placeholder="(padrão do .env)" />
+              </div>
+
+              <div class="box">
+                <p class="box-title">parâmetros</p>
+                <div class="row">
+                  <div>
+                    <label for="run-maxturns">Máx. turnos</label>
+                    <input id="run-maxturns" type="number" min="2" max="60" />
+                  </div>
+                  <div>
+                    <label for="run-repeat">Repetições</label>
+                    <input id="run-repeat" type="number" min="1" max="10" value="1" />
+                  </div>
+                  <div>
+                    <label for="run-budget">Teto US$</label>
+                    <input id="run-budget" type="number" min="0" step="0.05" />
+                  </div>
+                </div>
+                <p class="hint">Teto por conversa. Os limites valem por simulação — nada aqui é fixo.</p>
+              </div>
+
+              <button id="run-btn" class="btn btn-primary btn-block">Rodar simulação</button>
+              <div class="run-controls">
+                <button id="cancel-btn" class="btn btn-ghost danger" disabled>Cancelar</button>
+                <button id="clear-btn" class="btn btn-ghost">Limpar</button>
+              </div>
+              <p id="run-status" class="status" role="status" aria-live="polite"></p>
+            </div>
+
+            <div class="run-output" id="run-output">
+              <div class="empty">
+                <p class="eyebrow">aguardando</p>
+                <p>Selecione um prompt e ao menos um cliente simulado, e clique em <strong>Rodar simulação</strong>.<br />As conversas aparecem aqui em tempo real.</p>
+              </div>
+            </div>
           </div>
-          <div class="grow"></div>
-          <input id="prompt-newid" type="text" placeholder="novo id (ex.: v2)" />
-          <button id="prompt-saveas">Salvar como</button>
-          <button id="prompt-save" class="primary">Salvar</button>
-        </div>
-        <textarea id="prompt-editor" class="code" spellcheck="false"></textarea>
-        <p id="prompt-status" class="muted"></p>
-      </section>
+        </section>
 
-      <!-- ===================== AGENTES / ROTEAMENTO ===================== -->
-      <section id="tab-agents" class="tabpane">
-        <div class="icp-layout">
-          <aside class="icp-list">
-            <div class="icp-list-head">
-              <h2>Setups</h2>
-              <button id="agent-new">+ Novo</button>
+        <!-- ===================== PROMPT ===================== -->
+        <section id="tab-prompt" class="tabpane" aria-labelledby="prompt-title">
+          <header class="page-head">
+            <p class="eyebrow"><span class="idx">002 /</span> prompt do agente</p>
+            <h1 id="prompt-title">O playbook que está em teste.</h1>
+            <p class="lead">Edite o system prompt e salve versões pra comparar. Cada <code>.md</code> em <code>config/agent/</code> vira uma versão aqui e no CLI.</p>
+          </header>
+
+          <div class="editor-head">
+            <div>
+              <label for="prompt-select">Versão</label>
+              <select id="prompt-select"></select>
             </div>
-            <ul id="agent-ul"></ul>
-            <p class="hint">Um setup define os modelos do agente. <b>single</b> = um modelo so. <b>router</b> = um roteador escolhe, a cada turno, entre os papeis (ex.: vendedor e closer).</p>
-          </aside>
-          <div class="icp-editor">
-            <div class="row">
-              <div>
-                <label>id</label>
-                <input id="agent-id" type="text" placeholder="ex.: router-trio" />
+            <div class="grow"></div>
+            <input id="prompt-newid" type="text" placeholder="novo id (ex.: v2)" aria-label="Id da nova versão" />
+            <button id="prompt-saveas" class="btn btn-ghost">Salvar como</button>
+            <button id="prompt-save" class="btn btn-primary">Salvar</button>
+          </div>
+          <textarea id="prompt-editor" class="code editor-tall" spellcheck="false" aria-label="Conteúdo do prompt"></textarea>
+        </section>
+
+        <!-- ===================== AGENTES / ROTEAMENTO ===================== -->
+        <section id="tab-agents" class="tabpane" aria-labelledby="agents-title">
+          <header class="page-head">
+            <p class="eyebrow"><span class="idx">003 /</span> agentes &amp; roteamento</p>
+            <h1 id="agents-title">Quem responde — e quando.</h1>
+            <p class="lead">Um setup define os modelos do agente sob teste: um modelo único, ou um roteador que escolhe o papel certo a cada turno.</p>
+          </header>
+
+          <div class="split-layout">
+            <aside class="side-list">
+              <div class="side-list-head">
+                <p class="box-title">setups</p>
+                <button id="agent-new" class="btn btn-ghost btn-sm">+ novo</button>
               </div>
-              <div>
-                <label>Nome (exibicao)</label>
-                <input id="agent-name" type="text" />
+              <ul id="agent-ul"></ul>
+            </aside>
+
+            <div class="side-editor">
+              <div class="box">
+                <p class="box-title">identidade</p>
+                <div class="row">
+                  <div>
+                    <label for="agent-id">id</label>
+                    <input id="agent-id" type="text" placeholder="ex.: router-trio" />
+                  </div>
+                  <div>
+                    <label for="agent-name">Nome (exibição)</label>
+                    <input id="agent-name" type="text" />
+                  </div>
+                  <div class="narrow">
+                    <label for="agent-mode">Modo</label>
+                    <select id="agent-mode">
+                      <option value="single">único</option>
+                      <option value="router">roteador</option>
+                    </select>
+                  </div>
+                  <div class="narrow">
+                    <label for="agent-prompt">Playbook</label>
+                    <select id="agent-prompt"></select>
+                  </div>
+                </div>
               </div>
-              <div class="narrow">
-                <label>Modo</label>
-                <select id="agent-mode"><option value="router">router</option><option value="single">single</option></select>
+
+              <div class="box" id="agent-single-box">
+                <p class="box-title">modelo único</p>
+                <div class="row">
+                  <div>
+                    <label for="single-model">Modelo (id no OpenRouter)</label>
+                    <input id="single-model" type="text" placeholder="ex.: anthropic/claude-sonnet-4.5" />
+                  </div>
+                  <div class="narrow">
+                    <label for="single-temp">Temperatura</label>
+                    <input id="single-temp" type="number" min="0" max="2" step="0.1" placeholder="padrão" />
+                  </div>
+                  <div class="narrow">
+                    <label for="single-effort">Raciocínio</label>
+                    <select id="single-effort">
+                      <option value="">—</option>
+                      <option value="low">low</option>
+                      <option value="medium">medium</option>
+                      <option value="high">high</option>
+                    </select>
+                  </div>
+                  <div class="narrow">
+                    <label for="single-maxtokens">Máx. tokens</label>
+                    <input id="single-maxtokens" type="number" min="64" step="64" placeholder="padrão" />
+                  </div>
+                </div>
+                <p class="hint">Temperatura e raciocínio só são enviados a modelos que suportam — a detecção é automática.</p>
               </div>
-              <div class="narrow">
-                <label>Playbook</label>
-                <select id="agent-prompt"></select>
+
+              <div id="agent-router-boxes" hidden>
+                <div class="box">
+                  <p class="box-title">roteador</p>
+                  <div class="row">
+                    <div>
+                      <label for="router-model">Modelo do roteador (barato)</label>
+                      <input id="router-model" type="text" placeholder="ex.: openai/gpt-oss-120b" />
+                    </div>
+                    <div class="narrow">
+                      <label for="router-temp">Temperatura</label>
+                      <input id="router-temp" type="number" min="0" max="2" step="0.1" placeholder="0" />
+                    </div>
+                    <div class="narrow">
+                      <label for="router-effort">Raciocínio</label>
+                      <select id="router-effort">
+                        <option value="">—</option>
+                        <option value="low">low</option>
+                        <option value="medium">medium</option>
+                        <option value="high">high</option>
+                      </select>
+                    </div>
+                    <div class="narrow">
+                      <label for="router-maxtokens">Máx. tokens</label>
+                      <input id="router-maxtokens" type="number" min="64" step="64" placeholder="400" />
+                    </div>
+                  </div>
+                  <p class="hint">A cada turno, o roteador lê a conversa e escolhe qual papel responde — pela descrição de cada um.</p>
+                </div>
+
+                <div class="box">
+                  <div class="box-head">
+                    <p class="box-title">papéis</p>
+                    <button id="role-add" class="btn btn-ghost btn-sm" type="button">+ papel</button>
+                  </div>
+                  <div id="role-cards"></div>
+                  <div class="row">
+                    <div class="narrow">
+                      <label for="agent-default-role">Papel padrão</label>
+                      <select id="agent-default-role"></select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <details class="advanced">
+                <summary>JSON do setup (avançado)</summary>
+                <pre id="agent-json" class="code-preview"></pre>
+                <p class="hint">É exatamente isto que vai pra <code>config/agents/&lt;id&gt;.json</code> — um agente de IA pode editar esses arquivos direto.</p>
+              </details>
+
+              <div class="editor-actions">
+                <button id="agent-delete" class="btn btn-ghost danger">Excluir</button>
+                <div class="grow"></div>
+                <button id="agent-save" class="btn btn-primary">Salvar setup</button>
               </div>
             </div>
-            <label>Configuracao (JSON) - router + roles, ou model unico. Cada modelo aceita: <code>model</code>, <code>temperature</code> (quando suportado), <code>reasoningEffort</code> (low/medium/high, quando suportado), <code>description</code> (para o roteador escolher) e <code>promptAddendum</code>.</label>
-            <textarea id="agent-config" class="code tall" spellcheck="false"></textarea>
+          </div>
+        </section>
+
+        <!-- ===================== ICPs ===================== -->
+        <section id="tab-icps" class="tabpane" aria-labelledby="icps-title">
+          <header class="page-head">
+            <p class="eyebrow"><span class="idx">004 /</span> clientes simulados</p>
+            <h1 id="icps-title">Os clientes que vão testar o seu agente.</h1>
+            <p class="lead">Cada perfil (ICP) tem uma persona — como a pessoa se comporta, negocia e decide — e uma ficha: o que o agente recebe sobre o lead.</p>
+          </header>
+
+          <div class="split-layout">
+            <aside class="side-list">
+              <div class="side-list-head">
+                <p class="box-title">perfis</p>
+                <button id="icp-new" class="btn btn-ghost btn-sm">+ novo</button>
+              </div>
+              <ul id="icp-ul"></ul>
+            </aside>
+
+            <div class="side-editor">
+              <div class="box">
+                <p class="box-title">identidade</p>
+                <div class="row">
+                  <div>
+                    <label for="icp-id">id</label>
+                    <input id="icp-id" type="text" placeholder="ex.: arquiteto-cetico" />
+                  </div>
+                  <div>
+                    <label for="icp-name">Nome (exibição)</label>
+                    <input id="icp-name" type="text" />
+                  </div>
+                  <div class="narrow">
+                    <label for="icp-stage">Estágio inicial</label>
+                    <select id="icp-stage"></select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="box">
+                <p class="box-title">persona</p>
+                <label for="icp-persona">Como o cliente simulado se comporta</label>
+                <textarea id="icp-persona" class="code tall" spellcheck="false"></textarea>
+                <p class="hint">Inclua o perfil de decisão: o que faz a pessoa fechar (<code>[FECHOU]</code>), recusar (<code>[RECUSOU]</code>) ou encerrar (<code>[ENCERRAR]</code>). A conversa vai até a negociação — não só a qualificação.</p>
+              </div>
+
+              <div class="box">
+                <div class="box-head">
+                  <p class="box-title">ficha do lead</p>
+                  <button id="ficha-add" class="btn btn-ghost btn-sm" type="button">+ campo</button>
+                </div>
+                <p class="hint" style="margin-top:0">O que o agente sob teste recebe sobre este lead, campo a campo — como viria do seu CRM.</p>
+                <div id="ficha-rows" class="kv-rows"></div>
+              </div>
+
+              <div class="editor-actions">
+                <button id="icp-delete" class="btn btn-ghost danger">Excluir</button>
+                <div class="grow"></div>
+                <button id="icp-save" class="btn btn-primary">Salvar perfil</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================== FERRAMENTAS ===================== -->
+        <section id="tab-tools" class="tabpane" aria-labelledby="tools-title">
+          <header class="page-head">
+            <p class="eyebrow"><span class="idx">005 /</span> ferramentas &amp; funil</p>
+            <h1 id="tools-title">O CRM simulado é seu.</h1>
+            <p class="lead">Edite as ferramentas que o agente recebe e os estágios do funil. Nada é fixo: renomeie, desligue, crie as suas — vale na próxima simulação.</p>
+          </header>
+
+          <div class="tools-layout">
+            <div class="box">
+              <div class="box-head">
+                <p class="box-title">funil (estágios)</p>
+                <button id="stage-add" class="btn btn-ghost btn-sm" type="button">+ estágio</button>
+              </div>
+              <p class="hint" style="margin-top:0">Usados pelas ferramentas com efeito <em>mover estágio</em> e como estágio inicial dos perfis.</p>
+              <div id="stage-rows" class="kv-rows"></div>
+            </div>
+
+            <div class="box-head tools-list-head">
+              <p class="box-title">ferramentas do agente</p>
+              <button id="tool-add" class="btn btn-ghost btn-sm" type="button">+ nova ferramenta</button>
+            </div>
+            <div id="tool-cards"></div>
+
             <div class="editor-actions">
-              <button id="agent-delete" class="danger">Excluir</button>
-              <button id="agent-template-router">Template router</button>
-              <button id="agent-template-single">Template single</button>
+              <button id="tools-restore" class="btn btn-ghost danger">Restaurar padrão</button>
               <div class="grow"></div>
-              <button id="agent-save" class="primary">Salvar setup</button>
+              <button id="tools-save" class="btn btn-primary">Salvar ferramentas</button>
             </div>
-            <p id="agent-status" class="muted"></p>
+            <p class="hint">Cada ferramenta tem um <strong>efeito</strong> no CRM simulado (criar nota, mover estágio, transferir pra humano…). Pra ferramentas próprias sem efeito no CRM, use o efeito <em>registrar chamada</em>. Tudo isto vive em <code>config/tools.json</code>.</p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- ===================== ICPs ===================== -->
-      <section id="tab-icps" class="tabpane">
-        <div class="icp-layout">
-          <aside class="icp-list">
-            <div class="icp-list-head">
-              <h2>ICPs</h2>
-              <button id="icp-new">+ Novo</button>
-            </div>
-            <ul id="icp-ul"></ul>
-          </aside>
-          <div class="icp-editor">
-            <div class="row">
-              <div>
-                <label>id</label>
-                <input id="icp-id" type="text" placeholder="ex.: arquiteto-cetico" />
+        <!-- ===================== HISTÓRICO ===================== -->
+        <section id="tab-history" class="tabpane" aria-labelledby="history-title">
+          <header class="page-head">
+            <p class="eyebrow"><span class="idx">006 /</span> histórico</p>
+            <h1 id="history-title">Cada conversa, registrada.</h1>
+            <p class="lead">Transcrições salvas em <code>output/runs/</code> — com tool calls, estado final do CRM, desfecho e custo. Prontas pra você (ou um agente analista) avaliar.</p>
+          </header>
+
+          <div class="split-layout">
+            <aside class="side-list">
+              <div class="side-list-head">
+                <p class="box-title">transcrições</p>
+                <button id="history-refresh" class="btn btn-ghost btn-sm">atualizar</button>
               </div>
-              <div>
-                <label>Nome (exibicao)</label>
-                <input id="icp-name" type="text" />
-              </div>
-              <div class="narrow">
-                <label>Estagio inicial</label>
-                <input id="icp-stage" type="number" value="6" />
+              <ul id="history-ul"></ul>
+            </aside>
+            <div class="side-editor history-view" id="history-view">
+              <div class="empty">
+                <p class="eyebrow">nada selecionado</p>
+                <p>Selecione uma transcrição pra ver a conversa, as notas do CRM simulado e baixar o JSON.</p>
               </div>
             </div>
-            <label>Persona (como o cliente simulado se comporta)</label>
-            <textarea id="icp-persona" class="code tall" spellcheck="false"></textarea>
-            <label>Ficha de pesquisa (JSON) - o que o agente recebe sobre o lead</label>
-            <textarea id="icp-ficha" class="code" spellcheck="false"></textarea>
-            <div class="editor-actions">
-              <button id="icp-delete" class="danger">Excluir</button>
-              <div class="grow"></div>
-              <button id="icp-save" class="primary">Salvar ICP</button>
-            </div>
-            <p id="icp-status" class="muted"></p>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
+    </div>
 
-      <!-- ===================== HISTORICO ===================== -->
-      <section id="tab-history" class="tabpane">
-        <div class="history-layout">
-          <aside class="history-list">
-            <div class="icp-list-head">
-              <h2>Transcricoes</h2>
-              <button id="history-refresh">Atualizar</button>
-            </div>
-            <ul id="history-ul"></ul>
-          </aside>
-          <div class="history-view" id="history-view">
-            <p class="muted empty">Selecione uma transcricao para ver a conversa e baixar o JSON.</p>
-          </div>
-        </div>
-      </section>
-    </main>
-
+    <div id="toasts" class="toasts" aria-live="polite"></div>
     <script src="/app.js"></script>
   </body>
 </html>

@@ -54,13 +54,19 @@ npm start
 # abre em http://localhost:5173
 ```
 
-Abas:
+A interface é dark, no design system da [4virtue](https://4virtue.com), e organiza tudo em
+formulários — nada de editar JSON na mão (mas todo formulário mostra/escreve os mesmos
+arquivos que um agente de IA editaria; ver `AGENTS.md`).
+
+Seções:
 
 - **Rodar** — escolhe o prompt, marca os ICPs, ajusta modelos/turnos/repetições e roda. As conversas aparecem **em tempo real**, com os *tool calls* (chips) e o raciocínio (`think`) visíveis. Cada conversa termina com um resumo e um link **baixar JSON**.
   - **Cancelar** — interrompe a execução em andamento na hora (aborta os requests em voo). A conversa interrompida **não é salva**.
   - **Limpar** — recarrega a página (limpa a tela). Não cancela um job rodando; use Cancelar antes se quiser parar.
 - **Prompt do agente** — edita o system prompt do agente e salva versões em `config/agent/`. "Salvar como" cria uma versão nova para comparar. O repositório vem com um **prompt de exemplo** (`config/agent/exemplo.md`) que vende um serviço fictício compatível com os ICPs de exemplo — troque pelo prompt do SEU agente.
-- **ICPs** — cria/edita/exclui personas. Cada ICP tem a **persona** (como o cliente se comporta, incluindo o perfil de decisão/negociação) e a **ficha** (o que o agente recebe sobre o lead).
+- **Agentes & roteamento** — setups de modelo em formulário estruturado: modelo único, ou roteador + papéis (cada papel com modelo, descrição e adendo de prompt).
+- **Clientes simulados** — cria/edita/exclui personas. Cada ICP tem a **persona** (como o cliente se comporta, incluindo o perfil de decisão/negociação) e a **ficha** (o que o agente recebe sobre o lead), editada campo a campo.
+- **Ferramentas & funil** — edita as ferramentas simuladas e os estágios do funil (ver seção 4). Renomeie, desligue, crie as suas.
 - **Histórico** — lista as transcrições salvas, mostra a conversa renderizada, as notas do CRM simulado e o download do JSON.
 
 ---
@@ -94,25 +100,34 @@ node cli/analyze.js --json               # agregado em JSON
 
 ---
 
-## 4. As ferramentas simuladas
+## 4. As ferramentas simuladas (configuráveis)
 
-Espelham nodes de um fluxo n8n real. Nenhuma faz chamada externa — só atualizam um "CRM" em memória e são registradas na transcrição.
+As ferramentas que o agente recebe e o mapa do funil são **100% configuráveis**: edite na
+aba **Ferramentas & funil** da interface, ou direto em **`config/tools.json`** (um agente de
+IA também pode editar — ver `AGENTS.md`). Nenhuma faz chamada externa — só atualizam um
+"CRM" em memória e são registradas na transcrição. As mudanças valem na próxima simulação.
 
-| Ferramenta         | nome interno         | efeito simulado |
-|--------------------|----------------------|-----------------|
-| Create a person    | `create_person`      | cria contato, devolve `person_id` |
-| Update Person_ID   | `update_person_id`   | vincula o contato ao deal |
-| Create an activity | `create_activity`    | cria tarefa para humano |
-| Create a note      | `create_note`        | registra nota no deal |
-| Update Deal_Stage  | `update_deal_stage`  | move o deal de estágio (6/7/8/9/10/20) |
-| contact_human      | `contact_human`      | "avisa a equipe" (Telegram) |
-| delegar_para_human | `delegar_para_human` | desativa a IA no contato → **encerra a conversa (handoff)** |
-| Think              | `think`              | raciocínio interno (aparece como `think:` na UI) |
+Cada ferramenta tem um **efeito** no CRM simulado. Os efeitos disponíveis:
+
+| Efeito | O que faz | Argumentos canônicos |
+|---|---|---|
+| `think` | raciocínio interno (aparece como `think:` na UI) | `input` |
+| `create_person` | cria contato, devolve `person_id` | `name`, `phone` |
+| `link_person` | vincula o contato ao deal | `person_id` |
+| `create_activity` | cria tarefa para humano | `subject`, `type`, `note` |
+| `create_note` | registra nota no deal | `content` |
+| `update_stage` | move o deal de estágio (a lista de estágios entra sozinha na descrição) | `stage_id` |
+| `notify_human` | "avisa a equipe" (Telegram) | `message` |
+| `handoff` | desativa a IA no contato → **encerra a conversa** | `motivo` |
+| `log` | só registra a chamada (ferramentas próprias sem efeito no CRM) | qualquer |
+
+O conjunto padrão (`think`, `create_person`, `update_person_id`, `create_activity`,
+`create_note`, `update_deal_stage`, `contact_human`, `delegar_para_human`) espelha nodes de
+um fluxo n8n real com Pipedrive/Telegram/Chatwoot — **troque pelos do SEU agente**: renomeie,
+desligue, mude descrições e argumentos, crie novas. O funil padrão (6 Inbox … 20 Fechamento)
+também é só um exemplo; defina os estágios do seu processo.
 
 O agente recebe, a cada turno, a **ficha do lead** e o **estado atual do CRM** (estágio, notas, atividades) — equivalente às notas do CRM no fluxo real.
-
-> As ferramentas e o mapa do funil estão em `src/tools/tools.js`. Se o seu agente usa outras
-> ferramentas, é lá que você adapta — cada uma é um schema + um efeito simulado em memória.
 
 ---
 
@@ -177,23 +192,32 @@ Quando você roda vários ICPs de uma vez, também é salvo um `batch_*.json` co
 
 ---
 
-## 6. Loop de iteração com um agente de IA
+## 6. Para agentes de IA (interface pra humanos, skill pra agentes)
 
-O fluxo que a aplicação habilita:
+O Sparring foi desenhado pra ser operado **tanto por você quanto pelo seu agente de CLI**
+(Claude Code, Cursor, Codex…). Tudo que a interface faz é ler/escrever arquivos em `config/`
+e chamar o CLI — então um agente faz o mesmo, sem interface:
 
-1. **Rodar** os testes: `node cli/run.js --icp all --prompt exemplo`
-2. **Analisar** as transcrições: peça a um agente de IA (Claude Code, Cursor etc.) para ler os
-   JSON em `output/runs/` usando a régua em `config/analysis-rubric.md`.
-3. **Ajustar** o prompt: o agente edita uma nova versão em `config/agent/` (ou via aba Prompt).
-4. **Repetir** com o novo prompt e comparar.
+- **`AGENTS.md`** (raiz) — o guia AI-friendly: mapa de arquivos, schemas de ICP/setup/
+  ferramentas, flags do CLI e o loop de iteração. Funciona com qualquer agente.
+- **Skill para Claude Code** — o repositório traz `.claude/skills/sparring/`; trabalhando
+  dentro do repo, o Claude Code a encontra sozinho. Peça, por exemplo:
 
-Sugestão de prompt para o agente analista:
+> Use a skill **sparring**: me entreviste sobre o meu negócio, preencha o prompt do agente,
+> os clientes simulados e as ferramentas em `config/`, rode o treino com teto de US$ 0,50
+> por conversa e me diga onde o agente errou.
 
-> Leia as transcrições JSON em `output/runs/` (as mais recentes).
-> Use a régua em `config/analysis-rubric.md` e o prompt do agente em `config/agent/exemplo.md`.
-> Para cada conversa, avalie aderência às regras e ao fluxo do funil, aponte os erros
-> concretos (com a citação da mensagem), e proponha edições específicas no prompt.
-> No fim, gere uma nova versão do prompt com as melhorias e explique o que mudou e por quê.
+Os mesmos dados que você preencheria na mão, o agente preenche por você — e você acompanha
+as simulações ao vivo na interface web.
+
+O loop de iteração que a aplicação habilita:
+
+1. **Configurar**: o agente entrevista você e preenche `config/` (prompt, ICPs, ferramentas).
+2. **Rodar**: `node cli/run.js --icp all --prompt <id> --json`
+3. **Analisar**: o agente lê os JSON em `output/runs/` com a régua de `config/analysis-rubric.md`
+   e aponta erros concretos, com citação.
+4. **Ajustar**: o agente escreve uma nova versão em `config/agent/` (nunca edita versão já testada).
+5. **Repetir** com o novo prompt e comparar desfecho e custo entre versões.
 
 ---
 
@@ -201,23 +225,26 @@ Sugestão de prompt para o agente analista:
 
 ```
 sparring/
+├── AGENTS.md                   # guia AI-friendly (schemas + CLI) p/ qualquer agente
+├── .claude/skills/sparring/    # skill do Claude Code (opera o harness por você)
 ├── config/
 │   ├── agent/exemplo.md        # system prompt de exemplo (troque pelo seu)
 │   ├── agents/*.json           # setups de agente (modelo único ou roteador)
 │   ├── icps/*.json             # personas dos clientes simulados (exemplos inclusos)
+│   ├── tools.json              # ferramentas simuladas + funil (configuráveis)
 │   └── analysis-rubric.md      # régua para a análise das conversas
 ├── src/
 │   ├── config.js               # lê .env
 │   ├── llm/openrouter.js       # cliente OpenRouter (chat + tool calling)
 │   ├── llm/capabilities.js     # detecta parâmetros suportados por modelo
-│   ├── tools/tools.js          # ferramentas simuladas + mapa do funil
+│   ├── tools/tools.js          # carrega config/tools.json + efeitos simulados
 │   ├── agent/salesAgent.js     # turno do agente (loop de ferramentas)
 │   ├── agent/router.js         # roteamento multi-modelo por turno
 │   ├── icp/icpClient.js        # turno do cliente simulado
 │   ├── sim/conversation.js     # orquestra a conversa inteira
 │   ├── store/store.js          # lê/escreve prompts, ICPs e runs
 │   └── server.js               # servidor web + API + SSE
-├── public/                     # interface web (HTML/CSS/JS)
+├── public/                     # interface web (HTML/CSS/JS, design system 4virtue)
 ├── cli/run.js                  # roda simulações (headless)
 ├── cli/analyze.js              # análise agregada rápida
 ├── docs/                       # página do projeto (hospedada na Vercel) + vídeo demo

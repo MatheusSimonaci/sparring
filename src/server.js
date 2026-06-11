@@ -5,6 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { config, paths, assertApiKey } from './config.js';
 import { runConversation } from './sim/conversation.js';
+import { loadToolsConfig, saveToolsConfig, defaultToolsConfig, EFFECTS } from './tools/tools.js';
 import {
   listAgentPrompts,
   readAgentPrompt,
@@ -264,6 +265,22 @@ const server = http.createServer(async (req, res) => {
           maxCostPerConversation: config.maxCostPerConversation,
         },
       });
+    }
+
+    // Ferramentas simuladas + funil (config/tools.json)
+    if (p === '/api/tools' && method === 'GET') {
+      return sendJson(res, 200, { ...loadToolsConfig(), effects: EFFECTS });
+    }
+    if (p === '/api/tools' && method === 'PUT') {
+      const body = await readBody(req);
+      try {
+        return sendJson(res, 200, saveToolsConfig(body));
+      } catch (e) {
+        return sendJson(res, 400, { error: String(e.message || e) });
+      }
+    }
+    if (p === '/api/tools/defaults' && method === 'GET') {
+      return sendJson(res, 200, { ...defaultToolsConfig(), effects: EFFECTS });
     }
 
     if (p === '/api/agents' && method === 'GET') {
