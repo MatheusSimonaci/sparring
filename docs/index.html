@@ -482,6 +482,7 @@
     <nav>
       <a class="js-github" href="#" rel="noopener">GitHub</a>
       <a class="js-linkedin" href="#" rel="noopener">LinkedIn</a>
+      <a class="js-email" href="#">Email</a>
     </nav>
   </div>
 </footer>
@@ -491,13 +492,15 @@
   const SITE_CONFIG = {
     toolName: "Sparring",
     githubUrl: "https://github.com/MatheusSimonaci/sparring",
-    linkedinUrl: "https://www.linkedin.com/in/matheus-simonaci-vieira",
+    linkedinUrl: "https://www.linkedin.com/in/matheus-simonaci-vieira-910b59280/",
+    email: "matheussimonaci@gmail.com",
   };
 
   document.querySelectorAll(".js-name").forEach((el) => { el.textContent = SITE_CONFIG.toolName; });
   document.querySelectorAll(".js-github").forEach((el) => { el.href = SITE_CONFIG.githubUrl; });
   document.querySelectorAll(".js-github-url").forEach((el) => { el.textContent = SITE_CONFIG.githubUrl; });
   document.querySelectorAll(".js-linkedin").forEach((el) => { el.href = SITE_CONFIG.linkedinUrl; });
+  document.querySelectorAll(".js-email").forEach((el) => { el.href = "mailto:" + SITE_CONFIG.email; });
 
   // ——— dados do replay: trecho VERBATIM de uma conversa real gerada pela
   //     ferramenta (run 20260611-002901_moveis-meta-ads). Nada inventado;

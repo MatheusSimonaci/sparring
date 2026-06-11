@@ -21,8 +21,8 @@ Tudo roda via **OpenRouter** (um endpoint, vários modelos).
 > Por que "Sparring"? Porque agente de IA erra — a questão é na frente de quem.
 > Aqui ele treina com sparring antes da luta real.
 >
-> **Página do projeto (com demo em vídeo):** abra `docs/index.html` — ou publique via
-> GitHub Pages (Settings → Pages → branch `main`, pasta `/docs`).
+> **Página do projeto (com demo em vídeo):** https://sparring-three.vercel.app
+> (fonte em `docs/`, hospedada na Vercel).
 
 ---
 
@@ -220,7 +220,7 @@ sparring/
 ├── public/                     # interface web (HTML/CSS/JS)
 ├── cli/run.js                  # roda simulações (headless)
 ├── cli/analyze.js              # análise agregada rápida
-├── docs/                       # página do projeto (GitHub Pages) + vídeo demo
+├── docs/                       # página do projeto (hospedada na Vercel) + vídeo demo
 ├── video/                      # fonte do vídeo demo (Remotion; npm próprio, opcional)
 ├── test/                       # testes (npm test)
 └── output/runs/                # transcrições JSON geradas (fora do git)
@@ -231,5 +231,8 @@ sparring/
 ## Licença
 
 [MIT](LICENSE). Feito por [Matheus Simonaci](https://github.com/MatheusSimonaci) — usado de
-verdade na prospecção da [4virtue](https://github.com/MatheusSimonaci). Publicado porque me
-foi útil; se te poupar uma conversa ruim com um cliente real, já valeu.
+verdade na prospecção da 4virtue. Publicado porque me foi útil; se te poupar uma conversa
+ruim com um cliente real, já valeu.
+
+Contato: matheussimonaci@gmail.com ·
+[LinkedIn](https://www.linkedin.com/in/matheus-simonaci-vieira-910b59280/)

@@ -5,6 +5,7 @@ output/runs/**/*.json
 !output/runs/.gitkeep
 *.log
 .DS_Store
+.vercel/
 
 # interno (nao publicar): prompts de producao e registros do processo
 config/agent/v*.md
