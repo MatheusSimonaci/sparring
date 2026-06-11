@@ -1,0 +1,20 @@
+node_modules/
+.env
+output/runs/*.json
+output/runs/**/*.json
+!output/runs/.gitkeep
+*.log
+.DS_Store
+.vercel/
+
+# interno (nao publicar): prompts de producao e registros do processo
+config/agent/v*.md
+DECISOES.md
+GOAL-AGENTE.md
+.omc/
+
+# fontes locais que NAO vao no repo publico:
+# - docs/  : fonte da landing (hospedada em https://sparring.4virtue.com/)
+# - video/ : projeto Remotion do video demo (npm proprio + chaves locais)
+docs/
+video/

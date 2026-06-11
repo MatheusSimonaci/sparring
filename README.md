@@ -21,8 +21,7 @@ Tudo roda via **OpenRouter** (um endpoint, vários modelos).
 > Por que "Sparring"? Porque agente de IA erra — a questão é na frente de quem.
 > Aqui ele treina com sparring antes da luta real.
 >
-> **Página do projeto (com demo em vídeo):** https://sparring-three.vercel.app
-> (fonte em `docs/`, hospedada na Vercel).
+> **Página do projeto:** https://sparring.4virtue.com/
 
 ---
 
@@ -37,7 +36,6 @@ copy .env.example .env       # Mac/Linux: cp .env.example .env
 ```
 
 Não há `npm install`: a aplicação é **zero-dependências** (usa só o Node).
-(Exceção: o projeto do vídeo demo em `video/` tem npm próprio — opcional.)
 
 Edite o `.env`:
 
@@ -200,8 +198,10 @@ e chamar o CLI — então um agente faz o mesmo, sem interface:
 
 - **`AGENTS.md`** (raiz) — o guia AI-friendly: mapa de arquivos, schemas de ICP/setup/
   ferramentas, flags do CLI e o loop de iteração. Funciona com qualquer agente.
-- **Skill para Claude Code** — o repositório traz `.claude/skills/sparring/`; trabalhando
-  dentro do repo, o Claude Code a encontra sozinho. Peça, por exemplo:
+- **Skill pronta** — o repositório traz a skill `sparring` em `.agents/skills/sparring/`
+  (o diretório padrão que Codex, Cursor, Gemini CLI, Copilot, OpenCode e outros leem),
+  com um symlink em `.claude/skills/sparring` para o Claude Code. Trabalhando dentro do
+  repo, o agente a encontra sozinho. Peça, por exemplo:
 
 > Use a skill **sparring**: me entreviste sobre o meu negócio, preencha o prompt do agente,
 > os clientes simulados e as ferramentas em `config/`, rode o treino com teto de US$ 0,50
@@ -226,7 +226,8 @@ O loop de iteração que a aplicação habilita:
 ```
 sparring/
 ├── AGENTS.md                   # guia AI-friendly (schemas + CLI) p/ qualquer agente
-├── .claude/skills/sparring/    # skill do Claude Code (opera o harness por você)
+├── .agents/skills/sparring/    # skill (dir padrão: Codex, Cursor, Gemini, OpenCode…)
+├── .claude/skills/sparring ->  # symlink p/ a skill acima (Claude Code)
 ├── config/
 │   ├── agent/exemplo.md        # system prompt de exemplo (troque pelo seu)
 │   ├── agents/*.json           # setups de agente (modelo único ou roteador)
@@ -247,8 +248,6 @@ sparring/
 ├── public/                     # interface web (HTML/CSS/JS, design system 4virtue)
 ├── cli/run.js                  # roda simulações (headless)
 ├── cli/analyze.js              # análise agregada rápida
-├── docs/                       # página do projeto (hospedada na Vercel) + vídeo demo
-├── video/                      # fonte do vídeo demo (Remotion; npm próprio, opcional)
 ├── test/                       # testes (npm test)
 └── output/runs/                # transcrições JSON geradas (fora do git)
 ```
