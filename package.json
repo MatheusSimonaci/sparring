@@ -9,7 +9,7 @@
     "serve": "node src/server.js",
     "run": "node cli/run.js",
     "analyze": "node cli/analyze.js",
-    "test": "node test/empty-recovery.test.mjs && node test/icp-decision.test.mjs && node test/routing.test.mjs"
+    "test": "node test/empty-recovery.test.mjs && node test/icp-decision.test.mjs && node test/routing.test.mjs && node test/template.test.mjs && node test/silence.test.mjs"
   },
   "engines": {
     "node": ">=18"

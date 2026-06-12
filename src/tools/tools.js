@@ -17,6 +17,8 @@
 //   update_stage    move o deal de estágio no funil (usa os estágios configurados)
 //   notify_human    avisa a equipe humana (ex.: Telegram) e marca como escalado
 //   handoff         transfere para humano e ENCERRA a conversa (desativa a IA)
+//   silent          encerra o turno SEM enviar mensagem ao lead (silêncio
+//                   deliberado: caixa postal, rejeição seca, encerramento)
 //   log             efeito genérico: só registra a chamada e devolve ok
 //                   (use para ferramentas próprias que não têm efeito no CRM)
 //
@@ -37,6 +39,7 @@ export const EFFECTS = [
   'update_stage',
   'notify_human',
   'handoff',
+  'silent',
   'log',
 ];
 
@@ -169,6 +172,17 @@ export const DEFAULT_TOOLS = [
       'Transfere o atendimento pra um humano (desativa a IA nesse contato no Chatwoot). Use em situacoes fora do seu preparo: negociacao de preco/condicoes, juridico, reclamacao seria.',
     params: [
       { name: 'motivo', type: 'string', required: false, description: 'Motivo curto da delegacao (registro interno).' },
+    ],
+  },
+  {
+    name: 'stay_silent',
+    displayName: 'Ficar em silencio',
+    effect: 'silent',
+    enabled: true,
+    description:
+      'Encerra o seu turno SEM enviar nenhuma mensagem ao lead. Use quando a melhor resposta e silencio: mensagem automatica/caixa postal, rejeicao seca e definitiva, ou conversa ja encerrada (confirmacao de cortesia). Registre nota/atividade ANTES de chamar esta ferramenta.',
+    params: [
+      { name: 'motivo', type: 'string', required: false, description: 'Motivo curto do silencio (registro interno).' },
     ],
   },
 ];
@@ -395,6 +409,11 @@ export function executeTool(name, args, crm, nowIso) {
       crm.iaDisabled = true;
       crm.escalated = true;
       return { ok: true, ia_disabled: true, message: 'Atendimento transferido pra humano.' };
+    }
+
+    case 'silent': {
+      crm.customCalls.push({ tool: name, args, at });
+      return { ok: true, silent: true, message: 'Turno encerrado sem resposta ao lead.' };
     }
 
     case 'log': {

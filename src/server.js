@@ -18,6 +18,9 @@ import {
   readAgentSetup,
   writeAgentSetup,
   deleteAgentSetup,
+  readTemplatesConfig,
+  writeTemplatesConfig,
+  getOpeningTemplate,
   saveRun,
   saveBatch,
   listRuns,
@@ -112,7 +115,11 @@ async function runJob(job, body, signal) {
     agentTemperature,
     icpTemperature,
     repeat,
+    templateId,
   } = body;
+
+  // Template de abertura: 'none' desliga; ausente usa o default de config/templates.json.
+  const openingTemplate = getOpeningTemplate(templateId || undefined);
 
   // Resolve setup de agente (roteamento). Se nao informado, fica null (modo single via agentModel).
   let setup = null;
@@ -162,6 +169,7 @@ async function runJob(job, body, signal) {
         icpTemperature: icpTemperature != null ? Number(icpTemperature) : config.icpTemperature,
         maxCost: maxCost != null ? Number(maxCost) : config.maxCostPerConversation,
         promptId: resolvedPromptId,
+        openingTemplate,
         signal,
         onEvent: (evt) => emit(job, { ...evt, icpId: icp.id, repeatIndex: r }),
       });
@@ -185,6 +193,7 @@ async function runJob(job, body, signal) {
       id: batchId,
       createdAt: batchCreatedAt,
       promptId: resolvedPromptId,
+      openingTemplateId: openingTemplate ? openingTemplate.id : null,
       agentModel: agentModel || config.agentModel,
       icpModel: icpModel || config.icpModel,
       runs: saved,
@@ -281,6 +290,19 @@ const server = http.createServer(async (req, res) => {
     }
     if (p === '/api/tools/defaults' && method === 'GET') {
       return sendJson(res, 200, { ...defaultToolsConfig(), effects: EFFECTS });
+    }
+
+    // Templates de primeira mensagem (config/templates.json)
+    if (p === '/api/templates' && method === 'GET') {
+      return sendJson(res, 200, readTemplatesConfig());
+    }
+    if (p === '/api/templates' && method === 'PUT') {
+      const body = await readBody(req);
+      try {
+        return sendJson(res, 200, writeTemplatesConfig(body));
+      } catch (e) {
+        return sendJson(res, 400, { error: String(e.message || e) });
+      }
     }
 
     if (p === '/api/agents' && method === 'GET') {

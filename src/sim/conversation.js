@@ -21,6 +21,17 @@ function singleSetup({ model, temperature, reasoningEffort }) {
   return { mode: 'single', model, temperature, reasoningEffort: reasoningEffort || null };
 }
 
+// Renderiza placeholders {campo} do template com os dados da ficha do lead.
+// {empresa} e alias de {marca}. Placeholder sem valor fica visivel no texto
+// (proposital: aparece na transcricao e denuncia ficha incompleta).
+export function renderTemplate(text, ficha = {}) {
+  return String(text).replace(/\{(\w+)\}/g, (raw, key) => {
+    if (key === 'empresa') return ficha.marca || ficha.empresa || raw;
+    const v = ficha[key];
+    return v == null || v === '' ? raw : String(v);
+  });
+}
+
 function resolveRole(setup, roleId) {
   if (setup.mode !== 'router') {
     return {
@@ -59,6 +70,7 @@ export async function runConversation(opts) {
     icpMaxTokens = config.icpMaxTokens,
     maxCost = config.maxCostPerConversation,
     chatOverride, // injetavel pra teste (substitui o cliente LLM em router/agente/icp)
+    openingTemplate = null, // { id, text }: primeiro toque FIXO, enviado sem LLM
   } = opts;
 
   const setup =
@@ -98,8 +110,76 @@ export async function runConversation(opts) {
 
   onEvent({ type: 'start', conversationId: id, icp: { id: icp.id, name: icp.name }, createdAt });
 
-  for (let t = 0; t < maxTurns; t++) {
-    const isOpening = t === 0;
+  // ---- Turno do ICP (cliente). Usado no loop e logo apos o template de abertura. ----
+  // Retorna 'break' quando a conversa deve encerrar.
+  async function leadTurn() {
+    let icpResult;
+    try {
+      icpResult = await runIcpTurn({
+        icp,
+        history,
+        model: icpModel,
+        temperature: icpTemperature,
+        signal,
+        maxTokens: icpMaxTokens,
+        ...(chatOverride ? { chat: chatOverride } : {}),
+      });
+    } catch (err) {
+      if (err?.name === 'AbortError' || signal?.aborted) {
+        endReason = 'cancelled';
+        return 'break';
+      }
+      endReason = 'icp_error';
+      onEvent({ type: 'error', side: 'icp', error: String(err.message || err) });
+      return 'break';
+    }
+    addCost('icp', icpModel, icpResult.cost, icpResult.promptTokens, icpResult.completionTokens);
+
+    const leadMsg = { role: 'lead', text: icpResult.message, createdAt: new Date().toISOString() };
+    messages.push(leadMsg);
+    if (icpResult.message) history.push({ role: 'lead', text: icpResult.message });
+    onEvent({ type: 'lead', turn: agentTurns, message: leadMsg, decision: icpResult.decision || null, cost: cost.total });
+
+    if (icpResult.end) {
+      decision = icpResult.decision || 'ended';
+      endReason = decision === 'closed' ? 'closed' : decision === 'declined' ? 'declined' : 'icp_ended';
+      return 'break';
+    }
+
+    if (maxCost > 0 && cost.total >= maxCost) {
+      budgetExceeded = true;
+      endReason = 'budget_exceeded';
+      onEvent({ type: 'budget', total: cost.total, maxCost });
+      return 'break';
+    }
+    return 'continue';
+  }
+
+  // ---- Abertura por template (primeiro toque fixo, sem LLM, custo zero) ----
+  // Espelha a operacao real: a automacao dispara o template e o agente so comeca
+  // a pensar quando o lead responde. O ICP responde ao template antes do loop.
+  let openingClosed = false;
+  if (openingTemplate && openingTemplate.text) {
+    const rendered = renderTemplate(openingTemplate.text, icp.ficha);
+    const templateMsg = {
+      role: 'agent',
+      text: rendered,
+      createdAt: new Date().toISOString(),
+      toolCalls: [],
+      thinking: '',
+      model: null,
+      roleId: 'template',
+      routerReason: null,
+      templateId: openingTemplate.id,
+    };
+    messages.push(templateMsg);
+    history.push({ role: 'agent', text: rendered });
+    onEvent({ type: 'agent', turn: 0, message: templateMsg, crm: snapshotCrm(crm), route: { roleId: 'template', model: null, reason: null }, cost: cost.total });
+    if ((await leadTurn()) === 'break') openingClosed = true;
+  }
+
+  for (let t = 0; t < maxTurns && !openingClosed; t++) {
+    const isOpening = t === 0 && !openingTemplate;
     if (signal?.aborted) {
       endReason = 'cancelled';
       break;
@@ -213,6 +293,15 @@ export async function runConversation(opts) {
       break;
     }
 
+    // ---- Silencio deliberado ----
+    // O agente usou a ferramenta de silencio (effect 'silent') ou terminou o turno
+    // so com ferramentas: nao ha mensagem pro lead (caixa postal, rejeicao seca,
+    // encerramento). Na simulacao nada mais acontece sem evento externo.
+    if (agentResult.silent || (!agentResult.message && agentResult.toolCalls.length > 0)) {
+      endReason = 'agent_silent';
+      break;
+    }
+
     // ---- Guarda anti-arrasto: o agente parou de mandar mensagem de verdade ----
     // (ex.: so narracao tipo "*(conversa encerrada)*" ou vazio). Encerra apos 2 seguidos.
     const agentNoise = !agentResult.message || /^\*?\(/.test(agentResult.message.trim());
@@ -236,51 +325,14 @@ export async function runConversation(opts) {
     }
 
     // ---- Turno do ICP (cliente) ----
-    let icpResult;
-    try {
-      icpResult = await runIcpTurn({
-        icp,
-        history,
-        model: icpModel,
-        temperature: icpTemperature,
-        signal,
-        maxTokens: icpMaxTokens,
-        ...(chatOverride ? { chat: chatOverride } : {}),
-      });
-    } catch (err) {
-      if (err?.name === 'AbortError' || signal?.aborted) {
-        endReason = 'cancelled';
-        break;
-      }
-      endReason = 'icp_error';
-      onEvent({ type: 'error', side: 'icp', error: String(err.message || err) });
-      break;
-    }
-    addCost('icp', icpModel, icpResult.cost, icpResult.promptTokens, icpResult.completionTokens);
-
-    const leadMsg = { role: 'lead', text: icpResult.message, createdAt: new Date().toISOString() };
-    messages.push(leadMsg);
-    if (icpResult.message) history.push({ role: 'lead', text: icpResult.message });
-    onEvent({ type: 'lead', turn: agentTurns, message: leadMsg, decision: icpResult.decision || null, cost: cost.total });
-
-    if (icpResult.end) {
-      decision = icpResult.decision || 'ended';
-      endReason = decision === 'closed' ? 'closed' : decision === 'declined' ? 'declined' : 'icp_ended';
-      break;
-    }
-
-    if (maxCost > 0 && cost.total >= maxCost) {
-      budgetExceeded = true;
-      endReason = 'budget_exceeded';
-      onEvent({ type: 'budget', total: cost.total, maxCost });
-      break;
-    }
+    if ((await leadTurn()) === 'break') break;
   }
 
   const transcript = buildTranscript({
     id,
     createdAt,
     icp,
+    openingTemplate,
     setup,
     icpModel,
     promptId,
@@ -330,6 +382,7 @@ function buildTranscript(o) {
     mode: setup.mode || 'single',
     setupId: setup.id || null,
     setupName: setup.name || null,
+    openingTemplateId: o.openingTemplate ? o.openingTemplate.id : null,
   };
   if (setup.mode === 'router') {
     agentInfo.routerModel = setup.router && setup.router.model;

@@ -61,6 +61,7 @@ export const paths = {
   icps: path.join(ROOT, 'config', 'icps'),
   agents: path.join(ROOT, 'config', 'agents'),
   toolsConfig: path.join(ROOT, 'config', 'tools.json'),
+  templatesConfig: path.join(ROOT, 'config', 'templates.json'),
   runs: path.join(ROOT, 'output', 'runs'),
   public: path.join(ROOT, 'public'),
 };

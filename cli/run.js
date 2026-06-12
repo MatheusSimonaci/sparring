@@ -16,6 +16,8 @@ import {
   readAgentPrompt,
   listAgentSetups,
   readAgentSetup,
+  readTemplatesConfig,
+  getOpeningTemplate,
   saveRun,
   saveBatch,
 } from '../src/store/store.js';
@@ -64,6 +66,10 @@ async function main() {
     console.log('\nICPs (config/icps/*.json):');
     if (!icps.length) console.log('  (nenhum)');
     for (const c of icps) console.log(`  - ${pad(c.id, 24)} ${c.name || ''}`);
+    const tcfg = readTemplatesConfig();
+    console.log('\nTEMPLATES DE ABERTURA (config/templates.json) - use com --template <id|none>:');
+    if (!tcfg.templates.length) console.log('  (nenhum)');
+    for (const t of tcfg.templates) console.log(`  - ${pad(t.id, 24)} ${t.name || ''}${tcfg.default === t.id ? '  [default]' : ''}`);
     console.log('');
     return;
   }
@@ -119,6 +125,16 @@ async function main() {
     process.exit(1);
   }
 
+  // Template de abertura: --template <id> forca um, --template none desliga,
+  // sem flag usa o default de config/templates.json (se houver).
+  let openingTemplate = null;
+  try {
+    openingTemplate = getOpeningTemplate(typeof args.template === 'string' ? args.template : undefined);
+  } catch (e) {
+    console.error('ERRO:', e.message);
+    process.exit(1);
+  }
+
   const agentModel = args['agent-model'] || config.agentModel;
   const icpModel = args['icp-model'] || config.icpModel;
   const maxTurns = Number(args['max-turns']) || config.maxTurns;
@@ -130,6 +146,7 @@ async function main() {
 
   if (!quiet) {
     console.log(`\nPrompt: ${promptId}  |  Agente: ${agentLabel}  |  ICP: ${icpModel}`);
+    console.log(`Abertura: ${openingTemplate ? `template "${openingTemplate.id}"` : 'gerada pelo agente'}`);
     console.log(`ICPs: ${icps.map((i) => i.id).join(', ')}  |  max-turns: ${maxTurns}  |  repeat: ${repeat}  |  teto: ${maxCost > 0 ? usd(maxCost) : 'sem teto'}\n`);
   }
 
@@ -150,6 +167,7 @@ async function main() {
         agentTemperature: config.agentTemperature,
         icpTemperature: config.icpTemperature,
         promptId,
+        openingTemplate,
         onEvent: (evt) => {
           if (quiet || asJson) return;
           if (evt.type === 'agent') {
@@ -201,6 +219,7 @@ async function main() {
     batchFile = saveBatch({
       createdAt: batchCreatedAt,
       promptId,
+      openingTemplateId: openingTemplate ? openingTemplate.id : null,
       agentSetupId: setup ? setup.id : null,
       agentModel: setup ? undefined : agentModel,
       icpModel,

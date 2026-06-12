@@ -152,6 +152,7 @@ export async function runAgentTurn({
         content: msg.content || '',
         tool_calls: toolCalls,
       });
+      let silentRequested = false;
       for (const tc of toolCalls) {
         let args = {};
         try {
@@ -169,12 +170,28 @@ export async function runAgentTurn({
           at: nowIso,
         };
         toolCallsLog.push(entry);
-        if (toolEffect(name) === 'think' && args.input) thinkingParts.push(args.input);
+        const effect = toolEffect(name);
+        if (effect === 'think' && args.input) thinkingParts.push(args.input);
+        if (effect === 'silent') silentRequested = true;
         messages.push({
           role: 'tool',
           tool_call_id: tc.id,
           content: JSON.stringify(result),
         });
+      }
+      if (silentRequested) {
+        // Silencio deliberado: o turno termina aqui, SEM mensagem ao lead e SEM
+        // a recuperacao anti-turno-vazio (que forcaria uma resposta).
+        return {
+          message: '',
+          silent: true,
+          toolCalls: toolCallsLog,
+          thinking: thinkingParts.join('\n---\n'),
+          usage,
+          cost,
+          promptTokens,
+          completionTokens,
+        };
       }
       continue; // volta pro modelo com os resultados
     }

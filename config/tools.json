@@ -5,12 +5,12 @@
       "name": "Inbox"
     },
     {
-      "id": 7,
-      "name": "Identificacao de Responsavel"
+      "id": 21,
+      "name": "Abordado"
     },
     {
-      "id": 8,
-      "name": "Qualificacao"
+      "id": 7,
+      "name": "Identificacao de Responsavel"
     },
     {
       "id": 9,
@@ -18,7 +18,7 @@
     },
     {
       "id": 10,
-      "name": "Acompanhamento"
+      "name": "Agendamento"
     },
     {
       "id": 20,
@@ -135,32 +135,38 @@
       ]
     },
     {
-      "name": "contact_human",
-      "displayName": "contact_human",
+      "name": "context_human",
+      "displayName": "context_human",
       "effect": "notify_human",
       "enabled": true,
-      "description": "Avisa a equipe humana (via Telegram) quando precisar de intervencao. Use junto com delegar_para_human em escaladas (preco, juridico, reclamacao seria).",
+      "description": "Manda mensagem pro Matheus no Telegram chamando ele pra atuar nesta conversa. E a sua ponte: use quando a situacao pedir o Matheus (cliente pronto pra fechar, negociacao, pedido fora do seu alcance) ou quando faltar informacao que voce nao tem. O contexto e o que ele vai ler ao abrir a conversa: escreva pra ele chegar pronto.",
       "params": [
         {
-          "name": "message",
+          "name": "contexto",
           "type": "string",
           "required": true,
-          "description": "Resumo pra equipe (Telegram): nome do lead, estagio do funil, o que ele pediu e o contexto relevante."
+          "description": "O que aconteceu e o que o lead quer/perguntou, curto e factual. E a primeira coisa que o Matheus le antes de responder."
+        },
+        {
+          "name": "sugestao",
+          "type": "string",
+          "required": true,
+          "description": "Sua sugestao do que fazer ou responder (voce conhece a conversa melhor que ninguem; ajude o Matheus a agir rapido)."
         }
       ]
     },
     {
-      "name": "delegar_para_human",
-      "displayName": "delegar_para_human",
-      "effect": "handoff",
+      "name": "stay_silent",
+      "displayName": "Ficar em silencio",
+      "effect": "silent",
       "enabled": true,
-      "description": "Transfere o atendimento pra um humano (desativa a IA nesse contato no Chatwoot). Use em situacoes fora do seu preparo: negociacao de preco/condicoes, juridico, reclamacao seria.",
+      "description": "Encerra o seu turno SEM enviar nenhuma mensagem ao lead. Use quando a melhor resposta e silencio: mensagem automatica/caixa postal, rejeicao seca e definitiva, ou conversa ja encerrada (confirmacao de cortesia). Registre nota/atividade ANTES de chamar esta ferramenta.",
       "params": [
         {
           "name": "motivo",
           "type": "string",
           "required": false,
-          "description": "Motivo curto da delegacao (registro interno)."
+          "description": "Motivo curto do silencio (registro interno)."
         }
       ]
     }

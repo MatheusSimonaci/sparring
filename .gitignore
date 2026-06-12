@@ -9,9 +9,18 @@ output/runs/**/*.json
 
 # interno (nao publicar): prompts de producao e registros do processo
 config/agent/v*.md
+config/agent/v*/
 DECISOES.md
 GOAL-AGENTE.md
+PLANO-TREINO.md
+DIARIO-LICOES.md
 .omc/
+output/*.html
+output/probes/
+config/templates.json
+config/agents/single-gpt54.json
+config/analysis-rubric.interna.md
+config/scenarios/
 
 # fontes locais que NAO vao no repo publico:
 # - docs/  : fonte da landing (hospedada em https://sparring.4virtue.com/)

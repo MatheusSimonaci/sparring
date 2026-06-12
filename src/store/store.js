@@ -123,6 +123,53 @@ export function deleteAgentSetup(id) {
   return false;
 }
 
+// ---------- Templates de primeira mensagem (config/templates.json) ----------
+// A abertura pode ser uma mensagem FIXA (template), enviada antes de o agente
+// "acordar" — como na operacao real, em que a automacao dispara o primeiro toque.
+// Schema: { "default": "<id|null>", "templates": [{ "id", "name", "text" }] }
+export function readTemplatesConfig() {
+  if (!fs.existsSync(paths.templatesConfig)) return { default: null, templates: [] };
+  try {
+    const obj = JSON.parse(fs.readFileSync(paths.templatesConfig, 'utf8'));
+    return {
+      default: obj.default || null,
+      templates: Array.isArray(obj.templates) ? obj.templates.filter((t) => t && t.id && t.text) : [],
+    };
+  } catch {
+    return { default: null, templates: [] };
+  }
+}
+
+export function writeTemplatesConfig(cfg) {
+  const clean = {
+    default: cfg.default || null,
+    templates: (Array.isArray(cfg.templates) ? cfg.templates : []).map((t) => {
+      if (!t || !t.id || !t.text) throw new Error('Template precisa de id e text.');
+      return { id: safeId(t.id), name: t.name || t.id, text: String(t.text) };
+    }),
+  };
+  if (clean.default && !clean.templates.some((t) => t.id === clean.default)) {
+    throw new Error(`Template default "${clean.default}" nao existe na lista.`);
+  }
+  fs.writeFileSync(paths.templatesConfig, JSON.stringify(clean, null, 2), 'utf8');
+  return clean;
+}
+
+// Resolve o template de abertura: id explicito > default do config > null.
+// id 'none' desliga o template mesmo havendo default.
+export function getOpeningTemplate(id) {
+  if (id === 'none') return null;
+  const cfg = readTemplatesConfig();
+  const wanted = id || cfg.default;
+  if (!wanted) return null;
+  const t = cfg.templates.find((x) => x.id === wanted);
+  if (!t) {
+    if (id) throw new Error(`Template "${id}" nao encontrado em config/templates.json.`);
+    return null; // default apontando pra algo removido: segue sem template
+  }
+  return { id: t.id, text: t.text };
+}
+
 // ---------- Runs (transcricoes) ----------
 function tsForFile(iso) {
   // 2026-06-02T15:39:50.660Z -> 20260602-153950
